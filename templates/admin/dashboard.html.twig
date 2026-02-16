@@ -1,0 +1,271 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}Tableau de bord{% endblock %}
+
+{% block main %}
+    <div class="container-fluid">
+        <!-- Statistiques principales -->
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>{{ totalLeads }}</h3>
+                        <p>Total leads</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <a href="{{ ea_url().setController('App\\Controller\\Admin\\LeadCrudController').setAction('index') }}" class="small-box-footer">
+                        Voir détails <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>{{ leadsGagnes }}</h3>
+                        <p>Leads gagnés</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <a href="{{ ea_url().setController('App\\Controller\\Admin\\LeadCrudController').setAction('index').set('filters', {status: 'Gagné'}) }}" class="small-box-footer">
+                        Voir <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>{{ leadsEnCours }}</h3>
+                        <p>Leads en cours</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-spinner"></i>
+                    </div>
+                    <a href="{{ ea_url().setController('App\\Controller\\Admin\\LeadCrudController').setAction('index').set('filters', {status: ['Nouveau','Contacté','Qualifié','Proposition','Négociation']}) }}" class="small-box-footer">
+                        Voir <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3>{{ leadsPerdus }}</h3>
+                        <p>Leads perdus</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <a href="{{ ea_url().setController('App\\Controller\\Admin\\LeadCrudController').setAction('index').set('filters', {status: 'Perdu'}) }}" class="small-box-footer">
+                        Voir <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphiques -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-gradient-primary text-white">
+                        <h3 class="card-title"><i class="fas fa-chart-pie mr-2"></i>Répartition par statut</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartStatut" style="min-height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-gradient-success text-white">
+                        <h3 class="card-title"><i class="fas fa-chart-bar mr-2"></i>Répartition par entité</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartEntite" style="min-height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-gradient-info text-white">
+                        <h3 class="card-title"><i class="fas fa-chart-line mr-2"></i>Évolution mensuelle</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartEvolution" style="min-height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-gradient-warning text-white">
+                        <h3 class="card-title"><i class="fas fa-tags mr-2"></i>Top 5 sources</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartSources" style="min-height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body_javascript %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Palette de couleurs modernes
+            const colors = {
+                primary: '#3498db',
+                success: '#2ecc71',
+                warning: '#f39c12',
+                danger: '#e74c3c',
+                info: '#3498db',
+                secondary: '#95a5a6',
+                dark: '#34495e',
+                light: '#ecf0f1'
+            };
+
+            // Graphique des statuts (donut amélioré)
+            const ctxStatut = document.getElementById('chartStatut').getContext('2d');
+            new Chart(ctxStatut, {
+                type: 'doughnut',
+                data: {
+                    labels: {{ leadsParStatut|map(item => item.status)|json_encode|raw }},
+                    datasets: [{
+                        data: {{ leadsParStatut|map(item => item.nombre)|json_encode|raw }},
+                        backgroundColor: [
+                            '#3498db', '#f1c40f', '#e67e22', '#9b59b6', '#e74c3c', '#2ecc71', '#95a5a6', '#34495e'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.raw;
+                                    let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    let percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+
+            // Graphique des entités (barres avec dégradé)
+            const ctxEntite = document.getElementById('chartEntite').getContext('2d');
+            const gradient = ctxEntite.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, '#3498db');
+            gradient.addColorStop(1, '#2ecc71');
+
+            new Chart(ctxEntite, {
+                type: 'bar',
+                data: {
+                    labels: {{ leadsParEntite|map(item => item.entite)|json_encode|raw }},
+                    datasets: [{
+                        label: 'Nombre de leads',
+                        data: {{ leadsParEntite|map(item => item.nombre)|json_encode|raw }},
+                        backgroundColor: gradient,
+                        borderRadius: 8,
+                        barPercentage: 0.6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#2c3e50',
+                            titleColor: '#fff',
+                            bodyColor: '#ddd'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            // Graphique d'évolution (ligne)
+            const ctxEvolution = document.getElementById('chartEvolution').getContext('2d');
+            new Chart(ctxEvolution, {
+                type: 'line',
+                data: {
+                    labels: {{ evolutionMois|map(item => item.mois)|json_encode|raw }},
+                    datasets: [{
+                        label: 'Nouveaux leads',
+                        data: {{ evolutionMois|map(item => item.nombre)|json_encode|raw }},
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: '#2980b9',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // Graphique des sources (horizontal bar)
+            const ctxSources = document.getElementById('chartSources').getContext('2d');
+            new Chart(ctxSources, {
+                type: 'bar',
+                data: {
+                    labels: {{ topSources|map(item => item.source)|json_encode|raw }},
+                    datasets: [{
+                        label: 'Nombre de leads',
+                        data: {{ topSources|map(item => item.nombre)|json_encode|raw }},
+                        backgroundColor: '#f39c12',
+                        borderRadius: 8,
+                        indexAxis: 'y'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}

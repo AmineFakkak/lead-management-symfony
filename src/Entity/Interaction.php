@@ -129,4 +129,9 @@ class Interaction
         $this->user = $user;
         return $this;
     }
+     #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->createdAt = new \DateTimeImmutable();
+    }
 }

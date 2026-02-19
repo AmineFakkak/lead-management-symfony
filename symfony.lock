@@ -48,7 +48,7 @@
         ]
     },
     "easycorp/easyadmin-bundle": {
-        "version": "4.28",
+        "version": "5.9999999",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",

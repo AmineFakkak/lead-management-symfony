@@ -210,4 +210,9 @@ public const STATUSES = ['Active', 'Terminée'];
 {
     return $this->getName() ?? '';
 }
+#[ORM\PrePersist]
+public function setCreatedAtValue(): void
+{
+    $this->createdAt = new \DateTimeImmutable();
+}
 }

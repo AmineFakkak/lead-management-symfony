@@ -3,10 +3,14 @@
 namespace App\Controller\Admin;
 
 use App\Repository\LeadRepository;
-use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Assets;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\CrudMenuItem;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\DashboardMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
+use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard; // <-- EA5
 use Symfony\Component\HttpFoundation\Response;
 use App\Entity\Entity;
 use App\Entity\Lead;
@@ -17,7 +21,7 @@ use App\Entity\Task;
 use App\Entity\Tag;
 use App\Entity\User;
 
-#[AdminDashboard(routePath: '/admin', routeName: 'admin')]
+#[AdminDashboard(routePath: '/admin', routeName: 'admin')] // <-- Remplace #[Route]
 class DashboardController extends AbstractDashboardController
 {
     private LeadRepository $leadRepository;
@@ -26,22 +30,53 @@ class DashboardController extends AbstractDashboardController
     {
         $this->leadRepository = $leadRepository;
     }
+ public function configureAssets(): Assets
+    {
+        return Assets::new()
+            // Google Fonts
+            ->addCssFile('https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700,800')
+            
+            // Font Awesome
+            ->addCssFile('https://kit.fontawesome.com/42d5adcbca.js')
+            
+            // Nucleo Icons
+            ->addCssFile('assets/css/nucleo-icons.css')
+            ->addCssFile('assets/css/nucleo-svg.css')
+            
+            // Soft UI Dashboard CSS
+            ->addCssFile('assets/css/soft-ui-dashboard.min.css')
+            
+            // Custom CSS for EasyAdmin integration
+            ->addCssFile('css/easyadmin-soft-ui.css')
+            
+            // JavaScript files
+            ->addJsFile('assets/js/core/popper.min.js')
+            ->addJsFile('assets/js/core/bootstrap.min.js')
+            ->addJsFile('assets/js/plugins/perfect-scrollbar.min.js')
+            ->addJsFile('assets/js/plugins/smooth-scrollbar.min.js')
+            ->addJsFile('assets/js/plugins/chartjs.min.js')
+            ->addJsFile('assets/js/soft-ui-dashboard.min.js');
+    }
 
+    public function configureCrud(): Crud
+    {
+        return Crud::new()
+            ->overrideTemplate('layout', 'admin/layout.html.twig');
+        }
+    public function configureDashboard(): Dashboard
+    {
+        return Dashboard::new()
+            ->setTitle('Gestion des Leads - Flash Ingénierie');
+    }
     public function index(): Response
     {
         $totalLeads = $this->leadRepository->count([]);
         $leadsParStatut = $this->leadRepository->countByStatut();
         $leadsParEntite = $this->leadRepository->countByEntite();
-        
-        // Nouveaux indicateurs
         $leadsGagnes = $this->leadRepository->count(['status' => 'Gagné']);
         $leadsPerdus = $this->leadRepository->count(['status' => 'Perdu']);
         $leadsEnCours = $this->leadRepository->countByStatus(['Nouveau','Contacté','Qualifié','Proposition','Négociation']);
-        
-        // Évolution mensuelle
         $evolutionMois = $this->leadRepository->countByMonth();
-        
-        // Top sources
         $topSources = $this->leadRepository->countBySource(5);
 
         return $this->render('admin/dashboard.html.twig', [
@@ -56,24 +91,20 @@ class DashboardController extends AbstractDashboardController
         ]);
     }
 
-    public function configureDashboard(): Dashboard
-    {
-        return Dashboard::new()
-            ->setTitle('Gestion des Leads - Flash Ingénierie')
-            ->setFaviconPath('favicon.ico')
-            ->renderContentMaximized();
-    }
+   
 
     public function configureMenuItems(): iterable
-    {
-        yield MenuItem::linktoDashboard('Tableau de bord', 'fa fa-home');
-        yield MenuItem::linkToCrud('Entités', 'fa fa-building', Entity::class);
-        yield MenuItem::linkToCrud('Leads', 'fa fa-users', Lead::class);
-        yield MenuItem::linkToCrud('Projets', 'fa fa-folder', Project::class);
-        yield MenuItem::linkToCrud('Campagnes', 'fa fa-bullhorn', Campaign::class);
-        yield MenuItem::linkToCrud('Interactions', 'fa fa-comments', Interaction::class);
-        yield MenuItem::linkToCrud('Tâches', 'fa fa-tasks', Task::class);
-        yield MenuItem::linkToCrud('Tags', 'fa fa-tags', Tag::class);
-        yield MenuItem::linkToCrud('Utilisateurs', 'fa fa-user', User::class);
-    }
+{
+    yield new DashboardMenuItem('Tableau de bord', 'fa fa-home');
+
+    yield new CrudMenuItem('Entités', 'fa fa-building', Entity::class);
+    yield new CrudMenuItem('Leads', 'fa fa-users', Lead::class);
+    yield new CrudMenuItem('Projets', 'fa fa-folder', Project::class);
+    yield new CrudMenuItem('Campagnes', 'fa fa-bullhorn', Campaign::class);
+    yield new CrudMenuItem('Interactions', 'fa fa-comments', Interaction::class);
+    yield new CrudMenuItem('Tâches', 'fa fa-tasks', Task::class);
+    yield new CrudMenuItem('Tags', 'fa fa-tags', Tag::class);
+    yield new CrudMenuItem('Utilisateurs', 'fa fa-user', User::class);
+}
+
 }

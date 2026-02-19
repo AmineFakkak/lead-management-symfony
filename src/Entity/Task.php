@@ -7,10 +7,11 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TaskRepository::class)]
+#[ORM\HasLifecycleCallbacks] // ← AJOUTEZ CETTE LIGNE
 class Task
 {
     public const PRIORITIES = ['Basse', 'Normale', 'Haute', 'Urgente'];
-public const STATUSES = ['À faire', 'En cours', 'Terminée', 'Annulée'];
+    public const STATUSES = ['À faire', 'En cours', 'Terminée', 'Annulée'];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -42,7 +43,29 @@ public const STATUSES = ['À faire', 'En cours', 'Terminée', 'Annulée'];
     private ?Lead $lead = null;
 
     #[ORM\ManyToOne(inversedBy: 'tasks')]
-    private ?user $assignedTo = null;
+    private ?User $assignedTo = null; // ← CORRIGEZ : 'user' → 'User' (majuscule)
+
+    // LIFECYCLE CALLBACK - AJOUTEZ CETTE MÉTHODE
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->createdAt = new \DateTimeImmutable();
+    }
+
+    // OPTIONNEL : Mettre à jour completedAt automatiquement
+    #[ORM\PreUpdate]
+    public function checkCompletion(): void
+    {
+        if ($this->status === 'Terminée' && $this->completedAt === null) {
+            $this->completedAt = new \DateTimeImmutable();
+        }
+        
+        if ($this->status !== 'Terminée' && $this->completedAt !== null) {
+            $this->completedAt = null;
+        }
+    }
+
+    // Getters et Setters...
 
     public function getId(): ?int
     {
@@ -57,7 +80,6 @@ public const STATUSES = ['À faire', 'En cours', 'Terminée', 'Annulée'];
     public function setTitle(string $title): static
     {
         $this->title = $title;
-
         return $this;
     }
 
@@ -69,7 +91,6 @@ public const STATUSES = ['À faire', 'En cours', 'Terminée', 'Annulée'];
     public function setDescription(?string $description): static
     {
         $this->description = $description;
-
         return $this;
     }
 
@@ -81,7 +102,6 @@ public const STATUSES = ['À faire', 'En cours', 'Terminée', 'Annulée'];
     public function setDueDate(?\DateTime $dueDate): static
     {
         $this->dueDate = $dueDate;
-
         return $this;
     }
 
@@ -90,28 +110,28 @@ public const STATUSES = ['À faire', 'En cours', 'Terminée', 'Annulée'];
         return $this->priority;
     }
 
- public function setPriority(string $priority): static
-{
-    if (!in_array($priority, self::PRIORITIES, true)) {
-        throw new \InvalidArgumentException("Invalid priority");
+    public function setPriority(string $priority): static
+    {
+        if (!in_array($priority, self::PRIORITIES, true)) {
+            throw new \InvalidArgumentException("Priorité invalide");
+        }
+        $this->priority = $priority;
+        return $this;
     }
-    $this->priority = $priority;
-    return $this;
-}
 
     public function getStatus(): ?string
     {
         return $this->status;
     }
 
-   public function setStatus(string $status): static
-{
-    if (!in_array($status, self::STATUSES, true)) {
-        throw new \InvalidArgumentException("Invalid status");
+    public function setStatus(string $status): static
+    {
+        if (!in_array($status, self::STATUSES, true)) {
+            throw new \InvalidArgumentException("Statut invalide");
+        }
+        $this->status = $status;
+        return $this;
     }
-    $this->status = $status;
-    return $this;
-}
 
     public function getCompletedAt(): ?\DateTimeImmutable
     {
@@ -121,7 +141,6 @@ public const STATUSES = ['À faire', 'En cours', 'Terminée', 'Annulée'];
     public function setCompletedAt(?\DateTimeImmutable $completedAt): static
     {
         $this->completedAt = $completedAt;
-
         return $this;
     }
 
@@ -130,34 +149,32 @@ public const STATUSES = ['À faire', 'En cours', 'Terminée', 'Annulée'];
         return $this->createdAt;
     }
 
+    // On garde le setter mais il ne sera pas utilisé par le formulaire
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
-
         return $this;
     }
 
-    public function getlead(): ?Lead
+    public function getLead(): ?Lead
     {
         return $this->lead;
     }
 
-    public function setlead(?Lead $lead): static
+    public function setLead(?Lead $lead): static
     {
         $this->lead = $lead;
-
         return $this;
     }
 
-    public function getAssignedTo(): ?user
+    public function getAssignedTo(): ?User // ← CORRIGEZ LE TYPE DE RETOUR
     {
         return $this->assignedTo;
     }
 
-    public function setAssignedTo(?user $assignedTo): static
+    public function setAssignedTo(?User $assignedTo): static // ← CORRIGEZ LE TYPE DU PARAMÈTRE
     {
         $this->assignedTo = $assignedTo;
-
         return $this;
     }
 }

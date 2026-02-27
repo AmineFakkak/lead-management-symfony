@@ -1,0 +1,25 @@
+/* Only necessary overrides - NO !important unless absolutely needed */
+:root {
+    --primary-color: #4f8ef7;
+    --sidebar-width: 260px;
+}
+
+/* Custom card styles */
+.card-dashboard {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.card-dashboard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Custom KPI card icon backgrounds */
+.kpi-icon-primary { background: rgba(79, 142, 247, 0.1); }
+.kpi-icon-success { background: rgba(47, 179, 68, 0.1); }
+.kpi-icon-danger { background: rgba(229, 62, 62, 0.1); }
+.kpi-icon-warning { background: rgba(217, 119, 6, 0.1); }
+
+/* Custom table styles */
+.table tbody tr:hover {
+    background-color: rgba(79, 142, 247, 0.025);
+}

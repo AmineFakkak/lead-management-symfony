@@ -6,7 +6,7 @@ use App\Repository\EntityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-
+#[ORM\HasLifecycleCallbacks] 
 #[ORM\Entity(repositoryClass: EntityRepository::class)]
 class Entity
 {
@@ -127,7 +127,11 @@ class Entity
 
         return $this;
     }
-
+   #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        $this->createdAt = new \DateTimeImmutable();
+    }
     /**
      * @return Collection<int, Lead>
      */

@@ -1,84 +1,67 @@
-{# templates/admin/menu.html.twig #}
-{% extends '@EasyAdmin/menu.html.twig' %}
+{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
+<nav id="main-menu">
+    {% block main_menu_before %}{% endblock %}
 
-{% block menu %}
-    <!-- Custom Logo/Brand Section -->
-    <div class="sidebar-brand p-3 mb-3" style="background: rgba(0,0,0,0.1);">
-        <a href="{{ path('admin') }}" class="text-white text-decoration-none d-flex align-items-center">
-            <div class="brand-image bg-white rounded-circle p-2 me-2" style="width: 40px; height: 40px;">
-                <i class="fa fa-bolt text-primary"></i>
-            </div>
-            <span class="brand-text fw-bold">Flash Ingénierie</span>
-        </a>
-    </div>
+    <ul class="menu">
+        {% block main_menu %}
+            {% for menuItem in ea().mainMenu.items %}
+                {% block menu_item %}
+                    {% set is_submenu_item_with_no_items = menuItem.type == constant('EasyCorp\\Bundle\\EasyAdminBundle\\Dto\\MenuItemDto::TYPE_SUBMENU') and not menuItem.hasSubItems %}
+                    {% if is_submenu_item_with_no_items %}
+                        {# this can happen when submenu items define permissions and the current user can't see any
+                           of the subitems; instead of only displaying the label of the empty submenu, don't display anything #}
+                    {% else %}
+                        <li class="{{ menuItem.isMenuSection ? 'menu-header' : 'menu-item' }} {{ menuItem.hasSubItems ? 'has-submenu' }} {{ menuItem.isSelected ? 'active' }} {{ menuItem.isExpanded ? 'expanded' }}">
+                            {{ _self.render_menu_item(menuItem) }}
 
-    <!-- Custom Welcome/User Info -->
-    <div class="user-panel px-3 pb-3 mb-3 d-flex align-items-center" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-        <div class="image">
-            <div class="bg-white rounded-circle p-2" style="width: 40px; height: 40px;">
-                <i class="fa fa-user-circle text-primary"></i>
-            </div>
-        </div>
-        <div class="info ms-2">
-            <span class="text-white">{{ app.user.email|default('Welcome!') }}</span>
-        </div>
-    </div>
-
-    <!-- Search Box -->
-    <div class="sidebar-search px-3 mb-4">
-        <div class="input-group">
-            <input type="text" class="form-control form-control-sm bg-dark text-white border-0" placeholder="Search..." style="opacity: 0.7;">
-            <button class="btn btn-sm btn-dark" type="button">
-                <i class="fas fa-search"></i>
-            </button>
-        </div>
-    </div>
-
-    <!-- Custom Menu Items -->
-    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
-        {% for item in ea.mainMenu().items %}
-            {{ _self.render_menu_item(item) }}
-        {% endfor %}
+                            {% if menuItem.hasSubItems %}
+                                <ul class="submenu">
+                                    {% for menuSubItem in menuItem.subItems %}
+                                        {% block menu_subitem %}
+                                            <li class="{{ menuSubItem.isMenuSection ? 'menu-header' : 'menu-item' }} {{ menuSubItem.isSelected ? 'active' }}">
+                                                {{ _self.render_menu_item(menuSubItem) }}
+                                            </li>
+                                        {% endblock menu_subitem %}
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </li>
+                    {% endif %}
+                {% endblock menu_item %}
+            {% endfor %}
+        {% endblock main_menu %}
     </ul>
 
-    <!-- Custom Footer Section -->
-    <div class="sidebar-footer mt-auto p-3" style="border-top: 1px solid rgba(255,255,255,0.1);">
-        <div class="text-center small">
-            <a href="#" class="text-white-50 text-decoration-none me-2">Settings</a> 
-            <span class="text-white-50">|</span>
-            <a href="{{ path('app_logout') }}" class="text-white-50 text-decoration-none ms-2">Logout</a>
-        </div>
-    </div>
-{% endblock %}
+    {% block main_menu_after %}{% endblock %}
+</nav>
+
+{% macro render_html_attributes(item) %}
+    {% for attribute_name, attribute_value in item.htmlAttributes %}
+        {{ attribute_name }}="{{ attribute_value|e('html') }}"
+    {% endfor %}
+{% endmacro %}
 
 {% macro render_menu_item(item) %}
-    {% if item.isMenuSection and not item.isMenuSection.item.isMenuSection %}
-        {# This is a section header #}
-        <li class="nav-header">{{ item.label }}</li>
-    {% elseif item.isMenuSection %}
-        {# This is a menu item #}
-        <li class="nav-item {% if item.isSelected %}active{% endif %} {% if item.items|length > 0 %}has-treeview{% endif %}">
-            <a href="{{ item.link }}" class="nav-link {% if item.isSelected %}active{% endif %}">
-                <i class="nav-icon {{ item.icon }}"></i>
-                <p>
-                    {{ item.label }}
-                    {% if item.items|length > 0 %}
-                        <i class="right fas fa-angle-left"></i>
-                    {% endif %}
-                </p>
-            </a>
-            {% if item.items|length > 0 %}
-                <ul class="nav nav-treeview">
-                    {% for subitem in item.items %}
-                        <li class="nav-item">
-                            <a href="{{ subitem.link }}" class="nav-link {% if subitem.isSelected %}active{% endif %}">
-                                <i class="nav-icon {{ subitem.icon }}"></i>
-                                <p>{{ subitem.label }}</p>
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ul>
+    {% if item.isMenuSection %}
+        <span class="menu-header-contents" {{ _self.render_html_attributes(item) }}>
+            {% if item.icon is not empty %}<twig:ea:Icon name="{{ item.icon }}" class="menu-icon" />{% endif %}
+            <span class="menu-item-label position-relative {{ item.cssClass }}">
+                {{ item.label|trans|raw }}
+            </span>
+            {% if item.badge %}
+                <span class="menu-item-badge rounded-pill badge {{ item.badge.cssClass }}" {{ _self.render_html_attributes(item.badge) }} style="{{ item.badge.htmlStyle }}">{{ item.badge.content }}</span>
             {% endif %}
-        </li>
+        </span>
+    {% else %}
+        <a href="{{ item.linkUrl }}" class="menu-item-contents {{ item.hasSubItems ? 'submenu-toggle' }} {{ item.cssClass }}" target="{{ item.linkTarget }}" rel="{{ item.linkRel }}" referrerpolicy="origin-when-cross-origin" {{ _self.render_html_attributes(item) }}>
+            {% if item.icon is not empty %}<twig:ea:Icon name="{{ item.icon }}" class="menu-icon" />{% endif %}
+            <span class="menu-item-label position-relative">
+                {{ item.label|trans|raw }}
+            </span>
+            {% if item.hasSubItems %}<twig:ea:Icon name="internal:chevron-right" class="submenu-toggle-icon" />{% endif %}
+            {% if item.hasVisibleBadge %}
+                <span class="menu-item-badge rounded-pill badge {{ item.badge.cssClass }}" {{ _self.render_html_attributes(item.badge) }} style="{{ item.badge.htmlStyle }}">{{ item.badge.content }}</span>
+            {% endif %}
+        </a>
     {% endif %}
 {% endmacro %}

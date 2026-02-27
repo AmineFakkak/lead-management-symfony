@@ -1,1581 +1,1033 @@
 {# templates/admin/layout.html.twig #}
-{% extends '@EasyAdmin/layout.html.twig' %}
+{% extends '@!EasyAdmin/layout.html.twig' %}
 
 {% block head_stylesheets %}
     {{ parent() }}
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-    /* Cacher les modals par défaut */
-    .modal {
-        display: none !important;
-    }
 
-    /* Ne les afficher que quand Bootstrap les active */
-    .modal.show {
-        display: block !important;
-    }
-
-    /* S'assurer que les modals sont bien cachés au chargement */
-    .fade:not(.show) {
-        opacity: 0;
-        display: none !important;
-    }
-
-    /* Correction pour les modals Bootstrap */
-    .modal-backdrop {
-        display: none !important;
-    }
-
-    .modal-backdrop.show {
-        display: block !important;
-    }
-
-    /* ═══════════════════════════════════════════════════════════════
-       RESET
-    ═══════════════════════════════════════════════════════════════ */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+    /* ═══════════════════════════════════════════════════════════
+       TOKENS
+    ═══════════════════════════════════════════════════════════ */
     :root {
-        --sidebar-w: 220px;
-        --topbar-h:  56px;
-
-        /* brand */
-        --blue:      #4f8ef7;
-        --blue-dk:   #3b7de8;
-        --blue-gl:   rgba(79,142,247,0.15);
-
-        /* sidebar */
-        --s-bg:        #07080f;
-        --s-border:    rgba(255,255,255,0.07);
-        --s-text:      rgba(255,255,255,0.72);
-        --s-muted:     rgba(255,255,255,0.26);
-        --s-hover:     rgba(255,255,255,0.05);
-        --s-active-bg: rgba(79,142,247,0.14);
-        --s-active-b:  rgba(79,142,247,0.5);
-
-        /* page */
-        --page-bg: #f1f3f9;
-        --sf-0:    #ffffff;
-        --sf-1:    #f8f9fc;
-        --sf-2:    #f1f3f9;
-        --sf-3:    #e8ecf4;
-
-        /* text */
-        --tx-1: #1a1f36;
-        --tx-2: #4a5568;
-        --tx-3: #718096;
-        --tx-4: #a0aec0;
-        --tx-5: #cbd5e0;
-
-        /* borders */
-        --bd-1: #e8ecf4;
-        --bd-2: #d0d7e2;
-
-        /* status */
-        --green:    #2fb344;
-        --green-bg: #d3f5db;
-        --red:      #e53e3e;
-        --red-bg:   #fee2e2;
-        --yellow:   #d97706;
-        --yellow-bg:#fef3c7;
-
-        /* radius */
-        --r1: 5px;
-        --r2: 8px;
-        --r3: 12px;
-        --r4: 16px;
-
-        /* shadows */
-        --e1: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
-        --e2: 0 4px 12px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
-        --e3: 0 12px 32px rgba(0,0,0,0.09), 0 4px 8px rgba(0,0,0,0.04);
-
-        --tr: all 0.15s cubic-bezier(0.4,0,0.2,1);
-
-        /* Kill EasyAdmin card variables */
-        --card-border-color: transparent;
-        --card-cap-bg: transparent;
-        --card-bg: transparent;
-    }
-
-    html, body {
-        height: 100%;
-        font-family: 'Inter', sans-serif;
-        background: var(--page-bg);
-        color: var(--tx-2);
-        font-size: 14px;
-        line-height: 1.5;
-    }
-
-    a { text-decoration: none; color: inherit; }
-
-    /* =========================================================
-       EASYADMIN LAYOUT — FIXED SCROLL CONTAINER APPROACH
-       
-       sidebar (.si) + topbar (.topbar) = position:fixed overlays.
-       EA's content wrapper becomes a fixed scroll container that
-       fills exactly the remaining viewport area. No flex fights.
-    ========================================================= */
-
-    body {
-        overflow: hidden !important;
-        background: var(--page-bg) !important;
-    }
-
-    /* 1. Nuke EA's own sidebar & topbar completely */
-    .ea-sidebar, aside.ea-sidebar, .main-sidebar, .sidebar-wrapper,
-    #sidebar, header.navbar, .navbar.main-header, nav.navbar.navbar-main,
-    .content-top, .navbar-custom-menu, .responsive-header {
-        display: none !important;
-        width: 0 !important;
-        min-width: 0 !important;
-        max-width: 0 !important;
-        flex: 0 0 0px !important;
-        overflow: hidden !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        border: none !important;
-    }
-
-    /* 2. EA wrapper: collapse to nothing, let our fixed elements take over */
-    body > .wrapper, .wrapper, #wrapper {
-        margin: 0 !important;
-        padding: 0 !important;
-        width: 0 !important;
-        height: 0 !important;
-        overflow: visible !important;
-        background: transparent !important;
-        display: block !important;
-    }
-
-    /* 3. Content area = fixed, fills exactly the remaining viewport */
-    .content-wrapper, .ea-main, #content-wrapper {
-        position: fixed !important;
-        top: var(--topbar-h) !important;
-        left: var(--sidebar-w) !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        width: auto !important;
-        height: auto !important;
-        overflow-y: auto !important;
-        overflow-x: auto !important;
-        background: var(--page-bg) !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        box-sizing: border-box !important;
-        z-index: 1 !important;
-    }
-
-    /* 4. Inner page content — normal block flow */
-    main.content, .ea-content, .ea-main > main {
-        padding: 1.75rem !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-        display: block !important;
-    }
-
-    /* ─── Content header: full-width bar with title + actions ──────── */
-    .content-header {
-        position: sticky !important;
-        top: 0 !important;
-        z-index: 98 !important;
-        background: var(--sf-0) !important;
-        border-radius: 0 !important;
-        padding: 0.85rem 1.75rem !important;
-        margin: 0 -1.75rem 1.5rem -1.75rem !important; /* bleed to edge of main.content padding */
-        box-shadow: 0 1px 0 var(--bd-1) !important;
-        border: none !important;
-        border-bottom: 1px solid var(--bd-1) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        flex-wrap: wrap !important;
-        gap: 0.75rem !important;
-        width: calc(100% + 3.5rem) !important; /* compensate for main.content padding */
-        box-sizing: border-box !important;
-    }
-
-    .content-header h1, .content-header .title,
-    .content-header h1.title {
-        font-size: 1.1rem !important;
-        font-weight: 700 !important;
-        color: var(--tx-1) !important;
-        letter-spacing: -0.02em !important;
-        margin: 0 !important;
-    }
-
-    .content-header .actions,
-    .content-header .global-actions {
-        display: flex !important;
-        align-items: center !important;
-        gap: 0.5rem !important;
-        flex-wrap: wrap !important;
-    }
-
-    /* ─── Datagrid filters: EA renders these with specific classes ─── */
-    /* EA filter form wrapper */
-    .datagrid-filters,
-    form[name="filters"],
-    .filters-form {
-        background: var(--sf-1) !important;
-        border-bottom: 1px solid var(--bd-1) !important;
-        padding: 0.7rem 1.75rem !important;
-        margin: 0 -1.75rem 1.5rem -1.75rem !important;
-        width: calc(100% + 3.5rem) !important;
-        display: flex !important;
-        align-items: flex-end !important;
-        flex-wrap: wrap !important;
-        gap: 0.6rem !important;
-        box-sizing: border-box !important;
-    }
-
-    /* Each filter field group */
-    .datagrid-filters .form-group,
-    .datagrid-filters .field-form-group,
-    .datagrid-filters > div,
-    form[name="filters"] .form-group {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 0.2rem !important;
-        margin: 0 !important;
-        min-width: 0 !important;
-    }
-
-    /* Filter labels */
-    .datagrid-filters label,
-    form[name="filters"] label {
-        font-size: 0.68rem !important;
-        font-weight: 700 !important;
-        color: var(--tx-3) !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.06em !important;
-        margin: 0 !important;
-        display: block !important;
-        white-space: nowrap !important;
-    }
-
-    /* Filter inputs, selects */
-    .datagrid-filters select,
-    .datagrid-filters .form-select,
-    .datagrid-filters input[type="text"],
-    .datagrid-filters input[type="search"],
-    .datagrid-filters input[type="date"],
-    .datagrid-filters input[type="datetime-local"],
-    form[name="filters"] select,
-    form[name="filters"] input[type="text"],
-    form[name="filters"] input[type="search"] {
-        height: 36px !important;
-        padding: 0 0.7rem !important;
-        font-size: 0.8rem !important;
-        font-family: 'Inter', sans-serif !important;
-        border: 1.5px solid var(--bd-2) !important;
-        border-radius: var(--r2) !important;
-        background: var(--sf-0) !important;
-        color: var(--tx-1) !important;
-        min-width: 120px !important;
-        max-width: 190px !important;
-        width: auto !important;
-        box-shadow: var(--e1) !important;
-        transition: border-color 0.15s, box-shadow 0.15s !important;
-        display: block !important;
-        -webkit-appearance: none !important;
-        appearance: none !important;
-    }
-    .datagrid-filters select,
-    .datagrid-filters .form-select,
-    form[name="filters"] select {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23718096' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
-        background-repeat: no-repeat !important;
-        background-position: right 0.6rem center !important;
-        padding-right: 1.8rem !important;
-    }
-    .datagrid-filters input:focus,
-    .datagrid-filters select:focus,
-    form[name="filters"] input:focus,
-    form[name="filters"] select:focus {
-        border-color: var(--blue) !important;
-        box-shadow: 0 0 0 3px var(--blue-gl) !important;
-        outline: none !important;
-    }
-
-    /* Filter action buttons row */
-    .datagrid-filters .filters-buttons,
-    .datagrid-filters [type="submit"],
-    .datagrid-filters button[type="submit"],
-    form[name="filters"] [type="submit"],
-    form[name="filters"] button[type="submit"] {
-        height: 36px !important;
-        padding: 0 1rem !important;
-        font-size: 0.78rem !important;
-        font-weight: 600 !important;
-        font-family: 'Inter', sans-serif !important;
-        border-radius: var(--r2) !important;
-        border: 1.5px solid var(--blue) !important;
-        background: var(--blue) !important;
-        color: #fff !important;
-        cursor: pointer !important;
-        white-space: nowrap !important;
-        transition: var(--tr) !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 0.35rem !important;
-        align-self: flex-end !important;
-    }
-    .datagrid-filters [type="submit"]:hover,
-    form[name="filters"] [type="submit"]:hover { background: var(--blue-dk) !important; }
-
-    /* Reset / remove filter links */
-    .datagrid-filters a[href*="removeFilter"],
-    .datagrid-filters .filters-reset,
-    form[name="filters"] a.btn-link {
-        font-size: 0.75rem !important;
-        color: var(--tx-4) !important;
-        text-decoration: none !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 0.25rem !important;
-        align-self: flex-end !important;
-        height: 36px !important;
-        padding: 0 0.25rem !important;
-        transition: color 0.13s !important;
-    }
-    .datagrid-filters a[href*="removeFilter"]:hover,
-    form[name="filters"] a.btn-link:hover { color: var(--red) !important; }
-
-    /* Toolbar */
-    .datagrid-toolbar {
-        display: flex !important;
-        align-items: center !important;
-        gap: 0.5rem !important;
-        flex-wrap: wrap !important;
-        margin-bottom: 1rem !important;
-        padding: 0.65rem 0.85rem !important;
-        background: var(--sf-0) !important;
-        border: 1px solid var(--bd-1) !important;
-        border-radius: var(--r3) !important;
-        box-shadow: var(--e1) !important;
-    }
-
-    /* ─── Beautiful custom checkboxes ────────────────────────────── */
-    /* Table checkboxes */
-    .datagrid table input[type="checkbox"],
-    table.table input[type="checkbox"] {
-        appearance: none !important;
-        -webkit-appearance: none !important;
-        width: 17px !important;
-        height: 17px !important;
-        border: 2px solid var(--bd-2) !important;
-        border-radius: 5px !important;
-        background: var(--sf-0) !important;
-        cursor: pointer !important;
-        display: inline-grid !important;
-        place-content: center !important;
-        vertical-align: middle !important;
-        transition: border-color 0.15s, background 0.15s, box-shadow 0.15s !important;
-        flex-shrink: 0 !important;
-        margin: 0 !important;
-        position: relative !important;
-    }
-    .datagrid table input[type="checkbox"]::before,
-    table.table input[type="checkbox"]::before {
-        content: '' !important;
-        width: 9px !important;
-        height: 9px !important;
-        transform: scale(0) !important;
-        transition: transform 0.12s ease !important;
-        background: #fff !important;
-        clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%) !important;
-    }
-    .datagrid table input[type="checkbox"]:checked,
-    table.table input[type="checkbox"]:checked {
-        background: var(--blue) !important;
-        border-color: var(--blue) !important;
-        box-shadow: 0 0 0 3px rgba(79,142,247,0.18) !important;
-    }
-    .datagrid table input[type="checkbox"]:checked::before,
-    table.table input[type="checkbox"]:checked::before {
-        transform: scale(1) !important;
-    }
-    .datagrid table input[type="checkbox"]:hover:not(:checked),
-    table.table input[type="checkbox"]:hover:not(:checked) {
-        border-color: var(--blue) !important;
-        background: var(--blue-gl) !important;
-    }
-
-    .datagrid-toolbar input[type="search"],
-    .datagrid-toolbar input[type="text"] {
-        width: auto !important;
-        display: inline-block !important;
-        min-width: 200px !important;
-        height: 32px !important;
-        padding: 0 0.75rem !important;
-        border: 1px solid var(--bd-2) !important;
-        border-radius: var(--r2) !important;
-        background: var(--sf-1) !important;
-        font-family: 'Inter', sans-serif !important;
-        font-size: 0.82rem !important;
-        color: var(--tx-2) !important;
-        outline: none !important;
-        box-shadow: inset 0 1px 2px rgba(0,0,0,0.04) !important;
-        transition: var(--tr) !important;
-    }
-    .datagrid-toolbar input:focus {
-        border-color: var(--blue) !important;
-        background: var(--sf-0) !important;
-        box-shadow: 0 0 0 3px var(--blue-gl) !important;
-    }
-
-    /* Table scroll container — must scroll horizontally itself */
-    .datagrid-table-responsive, .table-responsive {
-        border-radius: var(--r3) !important;
-        border: 1px solid var(--bd-1) !important;
-        box-shadow: var(--e1) !important;
-        overflow-x: auto !important;
-        overflow-y: visible !important;
-        background: var(--sf-0) !important;
-        width: 100% !important;
-        -webkit-overflow-scrolling: touch !important;
-    }
-
-    .datagrid table, table.table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-        font-family: 'Inter', sans-serif !important;
-        font-size: 0.84rem !important;
-        background: var(--sf-0) !important;
-        margin: 0 !important;
-        border: none !important;
-    }
-
-    .datagrid table thead tr th, table.table thead tr th {
-        background: var(--sf-1) !important;
-        color: var(--tx-4) !important;
-        font-size: 0.65rem !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.08em !important;
-        padding: 0.78rem 1rem !important;
-        border-bottom: 1px solid var(--bd-1) !important;
-        border-top: none !important; 
-        border-left: none !important; 
-        border-right: none !important;
-        white-space: nowrap !important;
-    }
-
-    .datagrid table thead th a, table.table thead th a {
-        color: var(--tx-4) !important;
-        font-size: 0.65rem !important; 
-        font-weight: 700 !important;
-        text-transform: uppercase !important; 
-        letter-spacing: 0.08em !important;
-        text-decoration: none !important;
-        display: inline-flex !important; 
-        align-items: center !important; 
-        gap: 0.3rem !important;
-        transition: color 0.13s !important;
-    }
-    .datagrid table thead th a:hover { color: var(--blue) !important; }
-    .datagrid table thead th.sorted a, .datagrid table thead th.sorted { color: var(--blue) !important; }
-
-    .datagrid table tbody tr td, table.table tbody tr td {
-        padding: 0.82rem 1rem !important;
-        color: var(--tx-2) !important;
-        font-size: 0.84rem !important;
-        border-bottom: 1px solid var(--bd-1) !important;
-        border-top: none !important; 
-        border-left: none !important; 
-        border-right: none !important;
-        vertical-align: middle !important;
-        line-height: 1.5 !important;
-    }
-    .datagrid table tbody tr:last-child td, table.table tbody tr:last-child td { border-bottom: none !important; }
-    .datagrid table tbody tr:hover td, table.table tbody tr:hover td { background: rgba(79,142,247,0.025) !important; }
-    .datagrid table tbody td strong { color: var(--tx-1) !important; font-weight: 600 !important; }
-
-    /* ─── Row action buttons — clean inline pills ───────────────── */
-    .datagrid table tbody td.actions,
-    table.table tbody td.actions {
-        white-space: nowrap !important;
-        text-align: right !important;
-        padding: 0.5rem 0.85rem !important;
-        width: 1% !important;
-        vertical-align: middle !important;
-    }
-
-    /* Base style for all row action buttons */
-    td.actions a.btn,
-    td.actions button.btn,
-    td.actions a,
-    td.actions button {
-        all: unset !important;
-        box-sizing: border-box !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 0.3rem !important;
-        padding: 0.3rem 0.7rem !important;
-        font-size: 0.75rem !important;
-        font-weight: 600 !important;
-        font-family: 'Inter', sans-serif !important;
-        border-radius: 6px !important;
-        border: 1.5px solid transparent !important;
-        cursor: pointer !important;
-        text-decoration: none !important;
-        transition: all 0.13s ease !important;
-        margin-left: 4px !important;
-        line-height: 1 !important;
-        white-space: nowrap !important;
-    }
-
-    /* Detail / View — blue ghost */
-    td.actions a.action-detail,
-    td.actions .action-detail {
-        color: var(--blue) !important;
-        border-color: rgba(79,142,247,0.3) !important;
-        background: rgba(79,142,247,0.07) !important;
-    }
-    td.actions a.action-detail:hover,
-    td.actions .action-detail:hover {
-        background: rgba(79,142,247,0.15) !important;
-        border-color: var(--blue) !important;
-    }
-
-    /* Edit — neutral ghost */
-    td.actions a.action-edit,
-    td.actions .action-edit {
-        color: var(--tx-2) !important;
-        border-color: var(--bd-2) !important;
-        background: var(--sf-1) !important;
-    }
-    td.actions a.action-edit:hover,
-    td.actions .action-edit:hover {
-        background: var(--sf-2) !important;
-        color: var(--tx-1) !important;
-        border-color: var(--bd-2) !important;
-    }
-
-    /* Delete — red ghost */
-    td.actions a.action-delete,
-    td.actions button.action-delete,
-    td.actions .action-delete {
-        color: var(--red) !important;
-        border-color: rgba(229,62,62,0.25) !important;
-        background: rgba(229,62,62,0.05) !important;
-    }
-    td.actions a.action-delete:hover,
-    td.actions button.action-delete:hover,
-    td.actions .action-delete:hover {
-        background: rgba(229,62,62,0.12) !important;
-        border-color: var(--red) !important;
-    }
-
-    /* btn-danger-soft util used in controller */
-    .btn-danger-soft {
-        color: var(--red) !important;
-        border-color: rgba(229,62,62,0.25) !important;
-        background: rgba(229,62,62,0.05) !important;
-    }
-    .btn-danger-soft:hover {
-        background: rgba(229,62,62,0.12) !important;
-    }
-
-    /* Association links */
-    .datagrid table tbody td a:not(.btn):not(.dropdown-item):not(.dropdown-toggle):not([data-bs-toggle]),
-    table.table tbody td a:not(.btn):not(.dropdown-item):not(.dropdown-toggle):not([data-bs-toggle]) {
-        display: inline-flex !important;
-        align-items: center !important;
-        padding: 0.15rem 0.55rem !important;
-        background: var(--sf-2) !important;
-        border: 1px solid var(--bd-1) !important;
-        border-radius: 100px !important;
-        font-size: 0.78rem !important;
-        font-weight: 500 !important;
-        color: var(--tx-2) !important;
-        text-decoration: none !important;
-        transition: var(--tr) !important;
-        line-height: 1.4 !important;
-    }
-    .datagrid table tbody td a:not(.btn):not(.dropdown-item):not(.dropdown-toggle):not([data-bs-toggle]):hover,
-    table.table tbody td a:not(.btn):not(.dropdown-item):not(.dropdown-toggle):not([data-bs-toggle]):hover {
-        background: var(--blue-gl) !important;
-        border-color: rgba(79,142,247,0.3) !important;
-        color: var(--blue) !important;
-    }
-
-    /* Global buttons */
-    .btn {
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 0.38rem !important;
-        border-radius: var(--r2) !important;
-        padding: 0.46rem 1rem !important;
-        font-size: 0.82rem !important;
-        font-weight: 600 !important;
-        font-family: 'Inter', sans-serif !important;
-        line-height: 1.2 !important;
-        transition: var(--tr) !important;
-        cursor: pointer !important;
-        text-decoration: none !important;
-        white-space: nowrap !important;
-        width: auto !important;
-    }
-
-    .btn-primary { background: var(--blue) !important; color: #fff !important; border-color: var(--blue) !important; box-shadow: 0 1px 4px rgba(79,142,247,0.3) !important; }
-    .btn-primary:hover { background: var(--blue-dk) !important; color: #fff !important; transform: translateY(-1px) !important; box-shadow: 0 4px 14px rgba(79,142,247,0.38) !important; }
-    .btn-primary:active { transform: none !important; }
-
-    .btn-secondary { background: var(--sf-0) !important; color: var(--tx-2) !important; border-color: var(--bd-2) !important; box-shadow: var(--e1) !important; }
-    .btn-secondary:hover { background: var(--sf-1) !important; color: var(--tx-1) !important; }
-
-    .btn-danger { background: rgba(229,62,62,0.07) !important; color: var(--red) !important; border-color: rgba(229,62,62,0.22) !important; }
-    .btn-danger:hover { background: rgba(229,62,62,0.14) !important; }
-
-    .btn-success { background: rgba(47,179,68,0.09) !important; color: var(--green) !important; border-color: rgba(47,179,68,0.26) !important; }
-    .btn-success:hover { background: rgba(47,179,68,0.17) !important; }
-
-    /* ═══════════════════════════════════════════════════════════════
-       FORMS — modern, clean, professional
-    ═══════════════════════════════════════════════════════════════ */
-
-    /* Form group spacing */
-    .form-group, .field-group, .mb-3, .mb-4 {
-        margin-bottom: 1.25rem !important;
-    }
-
-    /* Labels */
-    label, .form-label, .col-form-label, .field-label {
-        font-size: 0.78rem !important;
-        font-weight: 600 !important;
-        color: var(--tx-1) !important;
-        font-family: 'Inter', sans-serif !important;
-        margin-bottom: 0.35rem !important;
-        display: block !important;
-        line-height: 1.3 !important;
-        letter-spacing: 0.01em !important;
-    }
-
-    /* Required star */
-    label .required::after, label.required::after {
-        content: ' *';
-        color: var(--red);
-    }
-
-    /* All text inputs — NOT checkboxes/radios */
-    input[type="text"],
-    input[type="email"],
-    input[type="number"],
-    input[type="password"],
-    input[type="url"],
-    input[type="tel"],
-    input[type="date"],
-    input[type="time"],
-    input[type="datetime-local"],
-    input[type="month"],
-    input[type="week"],
-    input[type="search"],
-    textarea,
-    .form-control {
-        display: block !important;
-        width: 100% !important;
-        padding: 0.6rem 0.9rem !important;
-        font-family: 'Inter', sans-serif !important;
-        font-size: 0.875rem !important;
-        font-weight: 400 !important;
-        line-height: 1.55 !important;
-        color: var(--tx-1) !important;
-        background: var(--sf-0) !important;
-        border: 1.5px solid var(--bd-2) !important;
-        border-radius: var(--r2) !important;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
-        transition: border-color 0.15s, box-shadow 0.15s, background 0.15s !important;
-        outline: none !important;
-        -webkit-appearance: none !important;
-        appearance: none !important;
-    }
-
-    input[type="text"]:focus,
-    input[type="email"]:focus,
-    input[type="number"]:focus,
-    input[type="password"]:focus,
-    input[type="url"]:focus,
-    input[type="tel"]:focus,
-    input[type="date"]:focus,
-    input[type="time"]:focus,
-    input[type="datetime-local"]:focus,
-    input[type="search"]:focus,
-    textarea:focus,
-    .form-control:focus {
-        border-color: var(--blue) !important;
-        background: var(--sf-0) !important;
-        box-shadow: 0 0 0 3.5px rgba(79,142,247,0.18), 0 1px 2px rgba(0,0,0,0.04) !important;
-        outline: none !important;
-    }
-
-    input::placeholder, textarea::placeholder { color: var(--tx-5) !important; opacity: 1 !important; }
-
-    textarea { min-height: 100px !important; resize: vertical !important; }
-
-    /* Select */
-    select, .form-select {
-        display: block !important;
-        width: 100% !important;
-        padding: 0.6rem 2.2rem 0.6rem 0.9rem !important;
-        font-family: 'Inter', sans-serif !important;
-        font-size: 0.875rem !important;
-        color: var(--tx-1) !important;
-        background-color: var(--sf-0) !important;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23718096' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
-        background-repeat: no-repeat !important;
-        background-position: right 0.75rem center !important;
-        background-size: 12px 8px !important;
-        border: 1.5px solid var(--bd-2) !important;
-        border-radius: var(--r2) !important;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
-        transition: border-color 0.15s, box-shadow 0.15s !important;
-        -webkit-appearance: none !important;
-        appearance: none !important;
-        cursor: pointer !important;
-        outline: none !important;
-    }
-    select:focus, .form-select:focus {
-        border-color: var(--blue) !important;
-        box-shadow: 0 0 0 3.5px rgba(79,142,247,0.18) !important;
-        outline: none !important;
-    }
-
-    /* ─── Form checkboxes & radios — beautiful custom ──────────────── */
-    .form-check {
-        display: flex !important;
-        align-items: center !important;
-        gap: 0.55rem !important;
-        padding: 0 !important;
-        margin-bottom: 0.5rem !important;
-        min-height: unset !important;
-    }
-    .form-check-input[type="checkbox"],
-    input[type="checkbox"] {
-        appearance: none !important;
-        -webkit-appearance: none !important;
-        width: 17px !important;
-        height: 17px !important;
-        border: 2px solid var(--bd-2) !important;
-        border-radius: 5px !important;
-        background: var(--sf-0) !important;
-        cursor: pointer !important;
-        display: inline-grid !important;
-        place-content: center !important;
-        vertical-align: middle !important;
-        transition: border-color 0.15s, background 0.15s, box-shadow 0.15s !important;
-        flex-shrink: 0 !important;
-        margin: 0 !important;
-    }
-    .form-check-input[type="checkbox"]::before,
-    input[type="checkbox"]::before {
-        content: '' !important;
-        width: 9px !important;
-        height: 9px !important;
-        transform: scale(0) !important;
-        transition: transform 0.12s ease !important;
-        background: #fff !important;
-        clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%) !important;
-    }
-    .form-check-input[type="checkbox"]:checked,
-    input[type="checkbox"]:checked {
-        background: var(--blue) !important;
-        border-color: var(--blue) !important;
-        box-shadow: 0 0 0 3px rgba(79,142,247,0.18) !important;
-    }
-    .form-check-input[type="checkbox"]:checked::before,
-    input[type="checkbox"]:checked::before {
-        transform: scale(1) !important;
-    }
-    .form-check-input[type="checkbox"]:hover:not(:checked),
-    input[type="checkbox"]:hover:not(:checked) {
-        border-color: var(--blue) !important;
-        background: var(--blue-gl) !important;
-    }
-
-    /* Radio buttons */
-    .form-check-input[type="radio"],
-    input[type="radio"] {
-        appearance: none !important;
-        -webkit-appearance: none !important;
-        width: 17px !important;
-        height: 17px !important;
-        border: 2px solid var(--bd-2) !important;
-        border-radius: 50% !important;
-        background: var(--sf-0) !important;
-        cursor: pointer !important;
-        display: inline-grid !important;
-        place-content: center !important;
-        vertical-align: middle !important;
-        transition: border-color 0.15s, background 0.15s !important;
-        flex-shrink: 0 !important;
-        margin: 0 !important;
-    }
-    .form-check-input[type="radio"]::before,
-    input[type="radio"]::before {
-        content: '' !important;
-        width: 7px !important;
-        height: 7px !important;
-        border-radius: 50% !important;
-        background: #fff !important;
-        transform: scale(0) !important;
-        transition: transform 0.12s ease !important;
-    }
-    .form-check-input[type="radio"]:checked,
-    input[type="radio"]:checked {
-        background: var(--blue) !important;
-        border-color: var(--blue) !important;
-    }
-    .form-check-input[type="radio"]:checked::before,
-    input[type="radio"]:checked::before {
-        transform: scale(1) !important;
-    }
-    .form-check-label {
-        font-size: 0.84rem !important;
-        color: var(--tx-2) !important;
-        font-weight: 500 !important;
-        cursor: pointer !important;
-        line-height: 1.3 !important;
-    }
-
-    /* Help text */
-    .form-text, .form-help, small.help-block, .field-help {
-        font-size: 0.74rem !important;
-        color: var(--tx-3) !important;
-        margin-top: 0.3rem !important;
-        display: block !important;
-        line-height: 1.4 !important;
-    }
-
-    /* Invalid */
-    .is-invalid, .has-error input, .has-error select, .has-error textarea {
-        border-color: var(--red) !important;
-        box-shadow: 0 0 0 3px rgba(229,62,62,0.1) !important;
-    }
-    .invalid-feedback, .help-block.error {
-        color: var(--red) !important;
-        font-size: 0.75rem !important;
-        margin-top: 0.3rem !important;
-        display: block !important;
-    }
-
-    /* Form section headings */
-    .ea-form-panel-title, .form-fieldset legend {
-        font-size: 0.7rem !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.1em !important;
-        color: var(--tx-4) !important;
-        padding-bottom: 0.6rem !important;
-        border-bottom: 1px solid var(--bd-1) !important;
-        margin-bottom: 1.25rem !important;
-    }
-
-    /* ═══════════════════════════════════════════════════════════════
-       FORMS — full-width, centered, two-column grid
-    ═══════════════════════════════════════════════════════════════ */
-
-    /* Outer form containers */
-    .ea-new-form, .ea-edit-form,
-    form.new-form, form.edit-form {
-        max-width: 900px !important;
-        margin: 0 auto !important;
-        width: 100% !important;
-    }
-
-    /* Each card section */
-    .ea-new-form .card,
-    .ea-edit-form .card,
-    form.new-form .card,
-    form.edit-form .card {
-        background: var(--sf-0) !important;
-        border: 1px solid var(--bd-1) !important;
-        border-radius: var(--r3) !important;
-        box-shadow: var(--e2) !important;
-        overflow: hidden !important;
-        margin-bottom: 1.5rem !important;
-    }
-
-    /* Card header / section title */
-    .ea-new-form .card-header,
-    .ea-edit-form .card-header,
-    .ea-form-panel-title {
-        padding: 0.9rem 1.5rem !important;
-        background: var(--sf-1) !important;
-        border-bottom: 1px solid var(--bd-1) !important;
-        font-size: 0.68rem !important;
-        font-weight: 800 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.12em !important;
-        color: var(--tx-3) !important;
-        margin: 0 !important;
-    }
-
-    /* Card body — 2-column grid */
-    .ea-new-form .card-body,
-    .ea-edit-form .card-body {
-        padding: 1.5rem !important;
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 1rem 1.5rem !important;
-        align-items: start !important;
-    }
-
-    /* Fields that should span full width */
-    .ea-new-form .card-body .form-group:has(textarea),
-    .ea-edit-form .card-body .form-group:has(textarea),
-    .ea-new-form .card-body .field-textarea,
-    .ea-edit-form .card-body .field-textarea,
-    .ea-new-form .card-body .field-association[data-ea-widget*="autocomplete"],
-    .ea-edit-form .card-body .field-collection {
-        grid-column: 1 / -1 !important;
-    }
-
-    /* Form group */
-    .ea-new-form .form-group,
-    .ea-edit-form .form-group,
-    .ea-new-form .mb-3,
-    .ea-edit-form .mb-3 {
-        margin: 0 !important;
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 0.3rem !important;
-    }
-
-    /* Card footer — action buttons */
-    .ea-new-form .card-footer,
-    .ea-edit-form .card-footer,
-    .ea-edit-form-actions,
-    .ea-new-form-actions {
-        padding: 1rem 1.5rem !important;
-        background: var(--sf-1) !important;
-        border-top: 1px solid var(--bd-1) !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 0.65rem !important;
-        flex-wrap: wrap !important;
-        margin: 0 !important;
-    }
-
-    /* Badges */
-    .badge {
-        display: inline-flex !important; 
-        align-items: center !important;
-        border-radius: 100px !important; 
-        font-size: 0.67rem !important;
-        font-weight: 700 !important; 
-        padding: 0.24rem 0.65rem !important;
-        font-family: 'Inter', sans-serif !important; 
-        line-height: 1 !important;
-    }
-    .badge.bg-success, .badge-success    { background: var(--green-bg) !important; color: #155724 !important; }
-    .badge.bg-danger,  .badge-danger     { background: var(--red-bg) !important;   color: #7f1d1d !important; }
-    .badge.bg-warning, .badge-warning    { background: var(--yellow-bg) !important; color: #78350f !important; }
-    .badge.bg-info, .badge-info, .badge.bg-primary { background: rgba(79,142,247,0.12) !important; color: #1e40af !important; }
-
-    /* Pagination */
-    .pagination { 
-        display: flex !important; 
-        align-items: center !important; 
-        gap: 0.2rem !important; 
-        margin-top: 1.25rem !important; 
-        flex-wrap: wrap !important; 
-        justify-content: center !important; 
-        list-style: none !important; 
-        padding: 0 !important; 
-    }
-    .page-item .page-link { 
-        display: flex !important; 
-        align-items: center !important; 
-        justify-content: center !important; 
-        min-width: 32px !important; 
-        height: 32px !important; 
-        padding: 0 0.55rem !important; 
-        border: 1px solid var(--bd-1) !important; 
-        border-radius: var(--r2) !important; 
-        font-size: 0.8rem !important; 
-        font-weight: 500 !important; 
-        color: var(--tx-2) !important; 
-        background: var(--sf-0) !important; 
-        box-shadow: var(--e1) !important; 
-        transition: var(--tr) !important; 
-        text-decoration: none !important; 
-    }
-    .page-item .page-link:hover { 
-        background: var(--sf-1) !important; 
-        color: var(--blue) !important; 
-        border-color: var(--bd-2) !important; 
-    }
-    .page-item.active .page-link { 
-        background: var(--blue) !important; 
-        border-color: var(--blue) !important; 
-        color: #fff !important; 
-        font-weight: 700 !important; 
-    }
-
-    /* Alerts */
-    .alert { 
-        border-radius: var(--r3) !important; 
-        font-size: 0.82rem !important; 
-        font-family: 'Inter', sans-serif !important; 
-        padding: 0.75rem 1rem !important; 
-        margin-bottom: 0.85rem !important; 
-        display: flex !important; 
-        align-items: flex-start !important; 
-        gap: 0.55rem !important; 
-    }
-    .alert-success { background: var(--green-bg) !important; border-color: rgba(47,179,68,0.3) !important; color: #14532d !important; }
-    .alert-danger  { background: var(--red-bg) !important;   border-color: rgba(229,62,62,0.3) !important; color: #7f1d1d !important; }
-    .alert-warning { background: var(--yellow-bg) !important; border-color: rgba(217,119,6,0.3) !important; color: #78350f !important; }
-    .alert-info    { background: rgba(79,142,247,0.09) !important; border-color: rgba(79,142,247,0.28) !important; color: #1e40af !important; }
-
-    /* SIDEBAR - exact styles from your reference */
+        --sidebar-w : 240px;
+        --topbar-h  : 56px;
+        --blue      : #3b7de8;
+        --blue-dk   : #2563eb;
+        --blue-lt   : #60a5fa;
+        --blue-gl   : rgba(59,125,232,0.13);
+        --s-bg      : #162d4a;
+        --s-border  : rgba(255,255,255,0.09);
+        --s-text    : rgba(255,255,255,0.80);
+        --s-muted   : rgba(255,255,255,0.36);
+        --s-hover   : rgba(255,255,255,0.08);
+        --s-accent  : #60c8f5;
+        --page-bg   : #f0f4ff;
+        --sf-0      : #ffffff;
+        --sf-1      : #f5f7fd;
+        --sf-2      : #edf0fa;
+        --tx-1      : #0f172a;
+        --tx-2      : #334155;
+        --tx-3      : #64748b;
+        --tx-4      : #94a3b8;
+        --tx-5      : #cbd5e1;
+        --bd-1      : #e2e8f0;
+        --bd-2      : #cbd5e1;
+        --green     : #16a34a; --green-bg: #dcfce7;
+        --red       : #dc2626; --red-bg  : #fee2e2;
+        --amber     : #d97706;
+        --cyan      : #0891b2;
+        --violet    : #7c3aed;
+        --r2:8px; --r3:12px; --r4:16px;
+        --e0: 0 1px 2px rgba(0,0,0,0.04);
+        --e1: 0 1px 4px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+        --e2: 0 4px 16px rgba(0,0,0,0.08),0 2px 4px rgba(0,0,0,0.04);
+        --e3: 0 16px 48px rgba(0,0,0,0.12),0 4px 8px rgba(0,0,0,0.05);
+        --tr: all 0.15s ease;
+    }
+
+    *,*::before,*::after { box-sizing: border-box; }
+    html,body { font-family:'Plus Jakarta Sans',sans-serif; background:var(--page-bg); color:var(--tx-2); font-size:14px; line-height:1.55; }
+    a { text-decoration:none; color:inherit; }
+
+    /* ── Hide EA chrome ── */
+    body.ea { overflow:hidden; }
+    .wrapper { display:block!important; width:0!important; height:0!important; overflow:visible!important; }
+    .sidebar-wrapper,.responsive-header,.content-top,header.navbar,nav.navbar { display:none!important; }
+    .content-wrapper {
+        position:fixed!important; top:var(--topbar-h)!important; left:var(--sidebar-w)!important;
+        right:0!important; bottom:0!important; width:auto!important; height:auto!important;
+        overflow-y:auto!important; overflow-x:auto!important; background:var(--page-bg)!important;
+        margin:0!important; padding:0!important; z-index:1!important;
+    }
+    article.content { padding:0; min-height:100%; }
+
+    /* ═══════════════════════════════════════════════════════════
+       SIDEBAR
+    ═══════════════════════════════════════════════════════════ */
     .si {
-        position: fixed;
-        inset: 0 auto 0 0;
-        width: var(--sidebar-w);
-        background: var(--s-bg);
-        border-right: 1px solid var(--s-border);
-        display: flex;
-        flex-direction: column;
-        z-index: 999;
-        overflow: hidden;
+        position:fixed; inset:0 auto 0 0; width:var(--sidebar-w);
+        display:flex; flex-direction:column; z-index:100;
+        background:linear-gradient(180deg,#162d4a 0%,#1e3a5f 45%,#1a3457 100%);
+        box-shadow:4px 0 20px rgba(0,0,0,0.16);
+    }
+    .si::after { content:''; position:absolute; inset:0; pointer-events:none; z-index:0;
+        background:radial-gradient(circle at 80% 15%,rgba(96,200,245,0.07) 0%,transparent 55%),
+                   radial-gradient(circle at 10% 85%,rgba(59,125,232,0.10) 0%,transparent 55%); }
+
+    .si-brand { display:flex; align-items:center; gap:.6rem; padding:1rem; flex-shrink:0;
+        position:relative; z-index:1; background:rgba(0,0,0,0.10); border-bottom:1px solid var(--s-border); }
+    .si-brand-icon { width:32px; height:32px; border-radius:9px;
+        background:linear-gradient(135deg,#60c8f5,#3b7de8);
+        display:flex; align-items:center; justify-content:center; font-size:.72rem; color:#fff;
+        box-shadow:0 0 16px rgba(96,200,245,0.4),0 2px 6px rgba(0,0,0,0.18); flex-shrink:0; }
+    .si-brand-name { font-size:.86rem; font-weight:800; color:#fff; letter-spacing:-.02em; white-space:nowrap; }
+    .si-brand-badge { margin-left:auto; font-size:.5rem; font-weight:700; letter-spacing:.08em;
+        text-transform:uppercase; color:var(--s-accent); background:rgba(96,200,245,0.10);
+        border:1px solid rgba(96,200,245,0.22); border-radius:100px; padding:2px 7px; white-space:nowrap; }
+    .si-nav { flex:1; overflow-y:auto; overflow-x:hidden; display:flex; flex-direction:column;
+        padding:.5rem .6rem; position:relative; z-index:1; scrollbar-width:none; }
+    .si-nav::-webkit-scrollbar { display:none; }
+    .si-label { font-size:.55rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+        color:var(--s-muted); padding:.65rem .6rem .22rem; flex-shrink:0; }
+    .si-link { display:flex; align-items:center; gap:.5rem; padding:.42rem .7rem; border-radius:8px;
+        color:var(--s-text); font-size:.78rem; font-weight:500; border:1px solid transparent;
+        transition:var(--tr); flex-shrink:0; margin-bottom:1px; white-space:nowrap; position:relative; }
+    .si-link .si-ico { width:27px; height:27px; border-radius:7px; display:flex; align-items:center;
+        justify-content:center; font-size:.68rem; background:rgba(255,255,255,0.06);
+        color:var(--s-muted); transition:var(--tr); flex-shrink:0; }
+    .si-link:hover { background:var(--s-hover); color:#fff; }
+    .si-link:hover .si-ico { background:rgba(96,200,245,0.15); color:var(--s-accent); }
+    .si-link.active { background:rgba(255,255,255,0.12); color:#fff; border-color:rgba(255,255,255,0.16); }
+    .si-link.active .si-ico { background:linear-gradient(135deg,#60c8f5,#3b7de8); color:#fff; box-shadow:0 2px 8px rgba(96,200,245,0.35); }
+    .si-link.active::before { content:''; position:absolute; left:0; top:20%; height:60%; width:3px;
+        background:linear-gradient(180deg,var(--s-accent),var(--blue-lt)); border-radius:0 3px 3px 0; }
+
+    .si-user { flex-shrink:0; padding:.7rem .6rem; border-top:1px solid var(--s-border);
+        position:relative; z-index:1; display:flex; align-items:center; gap:.5rem; }
+    .si-user-avatar { width:30px; height:30px; border-radius:50%;
+        background:linear-gradient(135deg,var(--blue-lt),var(--blue));
+        display:flex; align-items:center; justify-content:center; color:#fff; font-size:.62rem; flex-shrink:0; }
+    .si-user-info { flex:1; min-width:0; }
+    .si-user-name { font-size:.72rem; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .si-user-role { font-size:.58rem; color:var(--s-muted); white-space:nowrap; display:block; }
+    .si-user-logout { width:27px; height:27px; border-radius:7px; background:rgba(255,255,255,0.05);
+        border:1px solid rgba(255,255,255,0.09); display:flex; align-items:center; justify-content:center;
+        color:var(--s-muted); font-size:.62rem; cursor:pointer; transition:var(--tr); flex-shrink:0; }
+    .si-user-logout:hover { background:rgba(220,38,38,0.18); border-color:rgba(220,38,38,0.32); color:#fca5a5; }
+
+    /* ═══════════════════════════════════════════════════════════
+       TOPBAR
+    ═══════════════════════════════════════════════════════════ */
+    .our-topbar {
+        position:fixed; top:0; left:var(--sidebar-w); right:0; height:var(--topbar-h);
+        background:rgba(255,255,255,0.96); backdrop-filter:blur(18px);
+        border-bottom:1px solid var(--bd-1); box-shadow:0 1px 6px rgba(59,125,232,0.05);
+        display:flex; align-items:center; justify-content:space-between;
+        padding:0 1.5rem; z-index:100;
+    }
+    .our-topbar .topbar-title { font-size:.95rem; font-weight:800; color:var(--tx-1); letter-spacing:-.025em; }
+    .our-topbar .topbar-right { display:flex; align-items:center; gap:.45rem; }
+    .our-topbar .topbar-search { position:relative; }
+    .our-topbar .topbar-search i { position:absolute; left:9px; top:50%; transform:translateY(-50%); font-size:.62rem; color:var(--tx-4); pointer-events:none; }
+    .our-topbar .topbar-search input { all:unset; box-sizing:border-box; width:180px; height:32px; padding:0 .7rem 0 1.9rem;
+        background:var(--sf-1); border:1px solid var(--bd-2); border-radius:100px;
+        font-family:'Plus Jakarta Sans',sans-serif; font-size:.75rem; color:var(--tx-2);
+        transition:border-color .15s,box-shadow .15s,width .2s; }
+    .our-topbar .topbar-search input:focus { border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-gl); outline:none; width:210px; }
+    .our-topbar .topbar-search input::placeholder { color:var(--tx-5); }
+    .our-topbar .tb-icon-btn { width:32px; height:32px; border-radius:50%; background:var(--sf-1);
+        border:1px solid var(--bd-2); display:flex; align-items:center; justify-content:center;
+        cursor:pointer; transition:var(--tr); }
+    .our-topbar .tb-icon-btn i { font-size:.7rem; color:var(--tx-3); }
+    .our-topbar .tb-icon-btn:hover { border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-gl); }
+    .our-topbar .tb-divider { width:1px; height:20px; background:var(--bd-1); }
+    .our-topbar .topbar-avatar { width:32px; height:32px; border-radius:50%;
+        background:linear-gradient(135deg,var(--blue),#60c8f5);
+        display:flex; align-items:center; justify-content:center; color:#fff; font-size:.66rem; flex-shrink:0; }
+    .our-topbar .topbar-user-name { font-size:.78rem; font-weight:700; color:var(--tx-1); }
+
+    /* ═══════════════════════════════════════════════════════════
+       STATS CARDS
+    ═══════════════════════════════════════════════════════════ */
+    .crm-stats {
+        display:grid; grid-template-columns:repeat(4,1fr);
+        gap:1rem; padding:1.2rem 1.75rem .2rem;
+    }
+    .stat-card {
+        background:var(--sf-0); border:1px solid var(--bd-1); border-radius:14px;
+        padding:1.1rem 1.25rem 1rem; box-shadow:0 1px 5px rgba(0,0,0,0.05);
+        transition:transform .2s,box-shadow .2s; position:relative; overflow:hidden;
+    }
+    .stat-card:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(59,125,232,0.09); }
+
+    /* Thin top colour strip */
+    .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:14px 14px 0 0; }
+    .stat-card.c-blue::before   { background:linear-gradient(90deg,#3b7de8,#60c8f5); }
+    .stat-card.c-green::before  { background:linear-gradient(90deg,#16a34a,#4ade80); }
+    .stat-card.c-amber::before  { background:linear-gradient(90deg,#d97706,#fbbf24); }
+    .stat-card.c-red::before    { background:linear-gradient(90deg,#dc2626,#f87171); }
+    .stat-card.c-violet::before { background:linear-gradient(90deg,#7c3aed,#a78bfa); }
+    .stat-card.c-cyan::before   { background:linear-gradient(90deg,#0891b2,#22d3ee); }
+
+    .stat-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:.75rem; }
+    .stat-icon { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:.9rem; flex-shrink:0; }
+    .c-blue  .stat-icon { background:rgba(59,125,232,0.08);  color:#3b7de8; }
+    .c-green .stat-icon { background:rgba(22,163,74,0.08);   color:#16a34a; }
+    .c-amber .stat-icon { background:rgba(217,119,6,0.08);   color:#d97706; }
+    .c-red   .stat-icon { background:rgba(220,38,38,0.08);   color:#dc2626; }
+    .c-violet .stat-icon{ background:rgba(124,58,237,0.08);  color:#7c3aed; }
+    .c-cyan  .stat-icon { background:rgba(8,145,178,0.08);   color:#0891b2; }
+
+    .stat-badge { display:inline-flex; align-items:center; gap:3px; font-size:.64rem; font-weight:700; padding:2px 7px; border-radius:100px; }
+    .badge-up      { background:rgba(22,163,74,0.09);   color:#15803d; }
+    .badge-down    { background:rgba(220,38,38,0.09);   color:#b91c1c; }
+    .badge-neutral { background:rgba(100,116,139,0.09); color:#475569; }
+
+    /* Big number */
+    .stat-value { font-size:2.4rem; font-weight:800; letter-spacing:-.05em; color:var(--tx-1); line-height:1; margin-bottom:.12rem; }
+    /* Big readable label */
+    .stat-label { font-size:.92rem; font-weight:600; color:var(--tx-2); margin-bottom:.3rem; }
+    .stat-sub   { display:flex; align-items:center; gap:4px; font-size:.68rem; color:var(--tx-4); font-weight:500; }
+    .stat-sub i { font-size:.56rem; }
+
+    .stat-bar { margin-top:.8rem; height:3px; background:var(--sf-2); border-radius:10px; overflow:hidden; }
+    .stat-bar-fill { height:100%; border-radius:10px; width:0; transition:width 1s cubic-bezier(.4,0,.2,1); }
+    .c-blue  .stat-bar-fill { background:linear-gradient(90deg,#3b7de8,#60c8f5); }
+    .c-green .stat-bar-fill { background:linear-gradient(90deg,#16a34a,#4ade80); }
+    .c-amber .stat-bar-fill { background:linear-gradient(90deg,#d97706,#fbbf24); }
+    .c-red   .stat-bar-fill { background:linear-gradient(90deg,#dc2626,#f87171); }
+    .c-violet .stat-bar-fill{ background:linear-gradient(90deg,#7c3aed,#a78bfa); }
+    .c-cyan  .stat-bar-fill { background:linear-gradient(90deg,#0891b2,#22d3ee); }
+
+    @keyframes statIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    .stat-card { animation:statIn .38s ease both; }
+    .stat-card:nth-child(1){animation-delay:.04s}
+    .stat-card:nth-child(2){animation-delay:.10s}
+    .stat-card:nth-child(3){animation-delay:.16s}
+    .stat-card:nth-child(4){animation-delay:.22s}
+
+    /* ═══════════════════════════════════════════════════════════
+       CONTENT HEADER
+    ═══════════════════════════════════════════════════════════ */
+    section.content-header {
+        display:flex; align-items:center; justify-content:space-between;
+        flex-wrap:wrap; gap:.75rem; padding:1.3rem 1.75rem .6rem;
+        background:transparent; border:none;
+    }
+    section.content-header .content-header-title h1.title {
+        font-size:1.25rem; font-weight:800; color:var(--tx-1); letter-spacing:-.03em; margin:0;
+    }
+    section.content-header .page-actions { display:flex; align-items:center; gap:.4rem; flex-wrap:wrap; }
+
+    /* ═══════════════════════════════════════════════════════════
+       BUTTONS — simple, original-feel (no gradients, no shadows)
+    ═══════════════════════════════════════════════════════════ */
+    .btn {
+        display:inline-flex; align-items:center; gap:6px;
+        height:36px; padding:0 14px; border-radius:7px;
+        font-size:.79rem; font-weight:600; font-family:'Plus Jakarta Sans',sans-serif;
+        line-height:1; cursor:pointer; transition:var(--tr);
+        text-decoration:none; white-space:nowrap; border:1px solid transparent;
+    }
+    .btn-primary   { background:var(--blue);   color:#fff; border-color:var(--blue); }
+    .btn-primary:hover { background:var(--blue-dk); border-color:var(--blue-dk); color:#fff; }
+    .btn-secondary { background:var(--sf-0); color:var(--tx-2); border-color:var(--bd-2); }
+    .btn-secondary:hover { background:var(--sf-2); color:var(--tx-1); }
+    .btn-danger    { background:transparent; color:var(--red); border-color:rgba(220,38,38,0.28); }
+    .btn-danger:hover { background:var(--red-bg); }
+    .btn-sm { height:29px; padding:0 10px; font-size:.72rem; border-radius:6px; }
+    .btn-link { background:transparent!important; border:none!important; color:var(--tx-3); padding:0 6px; height:auto; }
+    .btn-link:hover { color:var(--red); }
+
+    /* ── Row action buttons ── */
+    td.actions { white-space:nowrap; text-align:right; padding:5px 12px; width:1%; vertical-align:middle; }
+    td.actions a, td.actions button {
+        all:unset; box-sizing:border-box;
+        display:inline-flex; align-items:center; gap:4px;
+        height:27px; padding:0 9px;
+        font-size:.71rem; font-weight:600; font-family:'Plus Jakarta Sans',sans-serif;
+        border-radius:6px; border:1px solid transparent;
+        cursor:pointer; transition:var(--tr); margin-left:3px; white-space:nowrap;
+    }
+    td.actions a.action-detail { color:var(--blue); border-color:rgba(59,125,232,0.22); background:rgba(59,125,232,0.05); }
+    td.actions a.action-detail:hover { background:rgba(59,125,232,0.11); border-color:rgba(59,125,232,0.38); }
+    td.actions a.action-edit { color:var(--tx-2); border-color:var(--bd-2); background:var(--sf-1); }
+    td.actions a.action-edit:hover { background:var(--sf-2); }
+    td.actions a.action-delete, td.actions button.action-delete { color:var(--red); border-color:rgba(220,38,38,0.18); background:rgba(220,38,38,0.04); }
+    td.actions a.action-delete:hover, td.actions button.action-delete:hover { background:rgba(220,38,38,0.10); border-color:rgba(220,38,38,0.38); }
+    td.actions a:not([class*="action-"]) { color:var(--cyan); border-color:rgba(8,145,178,0.20); background:rgba(8,145,178,0.04); }
+    td.actions a:not([class*="action-"]):hover { background:rgba(8,145,178,0.11); }
+
+    .datagrid table tbody td a:not(.btn):not([data-bs-toggle]) {
+        display:inline-flex; align-items:center; padding:2px 8px;
+        background:var(--sf-2); border:1px solid var(--bd-1); border-radius:100px;
+        font-size:.75rem; font-weight:500; color:var(--tx-2); transition:var(--tr);
+    }
+    .datagrid table tbody td a:not(.btn):not([data-bs-toggle]):hover { background:var(--blue-gl); border-color:rgba(59,125,232,0.28); color:var(--blue); }
+
+    /* ═══════════════════════════════════════════════════════════
+       TABLE
+    ═══════════════════════════════════════════════════════════ */
+    section.content-body { padding:1rem 1.75rem 1.75rem; }
+    .table-responsive { border-radius:var(--r3); border:1px solid var(--bd-1); box-shadow:var(--e1); overflow-x:auto; background:var(--sf-0); width:100%; }
+    .datagrid table,table.table { width:100%; border-collapse:collapse; font-family:'Plus Jakarta Sans',sans-serif; font-size:.84rem; background:var(--sf-0); margin:0; border:none; }
+    .datagrid table thead tr th,table.table thead tr th { background:var(--sf-1); color:var(--tx-3); font-size:.7rem; font-weight:700; padding:.82rem 1rem; border-bottom:1px solid var(--bd-1); white-space:nowrap; }
+    .datagrid table thead th a,table.table thead th a { color:var(--tx-3); font-size:.7rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:4px; }
+    .datagrid table thead th a:hover { color:var(--blue); }
+    .datagrid table thead th.sorted a,.datagrid table thead th.sorted { color:var(--blue); }
+    .datagrid table tbody tr td,table.table tbody tr td { padding:.82rem 1rem; color:var(--tx-2); border-bottom:1px solid var(--bd-1); vertical-align:middle; white-space:nowrap; }
+    .datagrid table tbody tr:last-child td { border-bottom:none; }
+    .datagrid table tbody tr:hover td { background:rgba(59,125,232,0.022); }
+    .datagrid table input[type="checkbox"],table.table input[type="checkbox"] {
+        -webkit-appearance:none; appearance:none; width:16px; height:16px; min-width:16px;
+        border:2px solid var(--bd-2); border-radius:4px; background:var(--sf-0);
+        background-repeat:no-repeat; background-position:center; background-size:10px;
+        cursor:pointer; transition:border-color .14s,background-color .14s; margin:0;
+    }
+    .datagrid table input[type="checkbox"]:checked,table.table input[type="checkbox"]:checked {
+        background-color:var(--blue); border-color:var(--blue);
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpolyline points='1.5,6 4.5,9 10.5,3' stroke='%23fff' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+    .datagrid table input[type="checkbox"]:indeterminate,table.table input[type="checkbox"]:indeterminate {
+        background-color:var(--blue); border-color:var(--blue);
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cline x1='2.5' y1='6' x2='9.5' y2='6' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
     }
 
-    .si::before {
-        content: '';
-        position: absolute;
-        width: 220px; height: 220px;
-        background: radial-gradient(circle, rgba(79,142,247,0.11) 0%, transparent 68%);
-        top: -70px; left: -70px;
-        pointer-events: none;
+    /* ── Badges ── */
+    .badge { display:inline-flex; align-items:center; border-radius:100px; font-size:.69rem; font-weight:700; padding:3px 9px; line-height:1.4; }
+    .badge-primary,.bg-primary   { background:rgba(59,125,232,0.11)!important; color:#1d4ed8!important; }
+    .badge-info,   .bg-info      { background:rgba(8,145,178,0.11)!important;  color:#0369a1!important; }
+    .badge-warning,.bg-warning   { background:rgba(217,119,6,0.11)!important;  color:#b45309!important; }
+    .badge-success,.bg-success   { background:rgba(22,163,74,0.11)!important;  color:#15803d!important; }
+    .badge-danger, .bg-danger    { background:rgba(220,38,38,0.11)!important;  color:#b91c1c!important; }
+    .badge-secondary             { background:rgba(71,85,105,0.11)!important;  color:#475569!important; }
+
+    /* ── Filters ── */
+    .datagrid-filters { background:transparent; border-bottom:1px solid var(--bd-1); padding:.5rem 1.75rem .8rem; display:flex; align-items:flex-end; flex-wrap:wrap; gap:.7rem; }
+    .datagrid-filters .form-group { display:flex; flex-direction:column; gap:3px; }
+    .datagrid-filters label { font-size:.62rem; font-weight:700; color:var(--tx-3); text-transform:uppercase; letter-spacing:.09em; }
+    .datagrid-filters select,.datagrid-filters input[type="text"],.datagrid-filters input[type="search"],.datagrid-filters input[type="date"] {
+        height:33px; padding:0 .65rem; font-size:.78rem; font-family:'Plus Jakarta Sans',sans-serif;
+        border:1px solid var(--bd-2); border-radius:7px; background:var(--sf-0); color:var(--tx-1);
+        min-width:110px; max-width:190px; transition:border-color .14s; appearance:none; }
+    .datagrid-filters input:focus,.datagrid-filters select:focus { border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-gl); outline:none; }
+
+    /* ── Pagination ── */
+    .pagination { display:flex; align-items:center; gap:3px; list-style:none; padding:0; margin-top:1.4rem; }
+    .page-item .page-link { display:flex; align-items:center; justify-content:center; min-width:33px; height:33px; padding:0 .55rem; border:1px solid var(--bd-1); border-radius:7px; font-size:.79rem; font-weight:600; color:var(--tx-2); background:var(--sf-0); text-decoration:none; transition:var(--tr); }
+    .page-item .page-link:hover { background:var(--sf-1); color:var(--blue); border-color:var(--bd-2); }
+    .page-item.active .page-link { background:var(--blue); border-color:var(--blue); color:#fff; }
+    .page-item.disabled .page-link { opacity:.4; pointer-events:none; }
+
+    /* ═══════════════════════════════════════════════════════════
+       FORMS
+       EA structure (horizontal layout):
+         <div class="form-group row mb-4">
+           <label class="col-sm-2 col-form-label">...</label>
+           <div class="col-sm-10">
+             <div class="form-widget">
+               <input class="form-control" ...>
+             </div>
+           </div>
+         </div>
+
+       We collapse the horizontal layout into a vertical one
+       and style the label as a small header above the input.
+    ═══════════════════════════════════════════════════════════ */
+
+    /* Fieldset card */
+    .content-body fieldset,
+    .content-body .form-fieldset {
+        background:var(--sf-0);
+        border:none; /* ← If you see a double border, try setting this to 'none' */
+        border-radius:14px;
+        padding:1.6rem 1.5rem 1.25rem;
+        margin-bottom:1.1rem;
+    }
+    .content-body fieldset legend,
+    .content-body .form-fieldset legend {
+        font-size:.62rem!important; font-weight:800!important;
+        letter-spacing:.1em!important; text-transform:uppercase!important;
+        color:var(--blue)!important; padding:0 6px!important;
+        background:var(--sf-0)!important;
     }
 
-    .si-brand {
-        display: flex;
-        align-items: center;
-        gap: 0.55rem;
-        padding: 1.15rem 1rem 1rem;
-        position: relative;
-        z-index: 1;
-        flex-shrink: 0;
+    /* Turn the horizontal row into a vertical stack */
+    .content-body .form-group.row,
+    .content-body .form-group.mb-4 {
+        display:flex!important;
+        flex-direction:column!important;
+        margin-bottom:1rem!important;
+        gap:0!important;
     }
 
-    .si-brand-icon {
-        width: 30px; height: 30px;
-        border-radius: 8px;
-        background: linear-gradient(135deg, var(--blue), #a78bfa);
-        display: flex; align-items: center; justify-content: center;
-        font-size: 0.7rem; color: #fff;
-        box-shadow: 0 0 16px rgba(79,142,247,0.3);
-        flex-shrink: 0;
+    /* Label — normal flow, small, blue */
+    .content-body .form-group .col-sm-2.col-form-label,
+    .content-body .form-group > label.form-label {
+        width:100%!important;
+        max-width:100%!important;
+        flex:none!important;
+        text-align:left!important;
+        padding:0 0 5px 2px!important;
+        font-size:.62rem!important;
+        font-weight:800!important;
+        color:var(--blue)!important;
+        text-transform:uppercase!important;
+        letter-spacing:.07em!important;
+        line-height:1!important;
+        position:static!important;
     }
 
-    .si-brand-name {
-        font-size: 0.84rem;
-        font-weight: 700;
-        color: #fff;
-        letter-spacing: -0.01em;
-        white-space: nowrap;
+    /* The input column — full width */
+    .content-body .form-group .col-sm-10 {
+        width:100%!important;
+        max-width:100%!important;
+        flex:none!important;
+        padding:0!important;
     }
 
-    .si-hr {
-        height: 1px;
-        background: var(--s-border);
-        margin: 0 1rem 0.15rem;
-        flex-shrink: 0;
-        position: relative;
-        z-index: 1;
+    /* Inputs */
+    .content-body .form-control,
+    .content-body input[type="text"],
+    .content-body input[type="email"],
+    .content-body input[type="password"],
+    .content-body input[type="number"],
+    .content-body input[type="tel"],
+    .content-body input[type="url"],
+    .content-body input[type="date"],
+    .content-body input[type="datetime-local"],
+    .content-body input[type="search"],
+    .content-body input[type="color"],
+    .content-body select.form-select,
+    .content-body textarea.form-control {
+        width:100%!important;
+        padding:9px 13px!important;
+        height:auto!important;
+        min-height:40px!important;
+        background:var(--sf-1)!important;
+        color:var(--tx-1)!important;
+        border:1.5px solid var(--bd-2)!important;
+        border-radius:9px!important;
+        font-family:'Plus Jakarta Sans',sans-serif!important;
+        font-size:.86rem!important;
+        font-weight:500!important;
+        outline:none!important;
+        transition:border-color .18s,box-shadow .18s,background .18s!important;
+        box-shadow:none!important;
+        appearance:none!important;
+        -webkit-appearance:none!important;
+        display:block!important;
+    }
+    .content-body .form-control:focus,
+    .content-body input[type="text"]:focus,
+    .content-body input[type="email"]:focus,
+    .content-body input[type="password"]:focus,
+    .content-body input[type="number"]:focus,
+    .content-body input[type="tel"]:focus,
+    .content-body input[type="url"]:focus,
+    .content-body input[type="date"]:focus,
+    .content-body input[type="datetime-local"]:focus,
+    .content-body input[type="search"]:focus,
+    .content-body select.form-select:focus,
+    .content-body textarea.form-control:focus {
+        border-color:var(--blue)!important;
+        box-shadow:0 0 0 3px var(--blue-gl)!important;
+        background:#fff!important;
+    }
+    .content-body textarea.form-control { min-height:100px!important; resize:vertical!important; padding:10px 13px!important; }
+    .content-body select.form-select {
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+        background-repeat:no-repeat!important;
+        background-position:right 12px center!important;
+        padding-right:2.2rem!important;
+        cursor:pointer!important;
     }
 
-    .si-nav {
-        flex: 1;
-        overflow-y: auto;
-        overflow-x: hidden;
-        display: flex;
-        flex-direction: column;
-        padding: 0 0.5rem;
-        position: relative;
-        z-index: 1;
-        scrollbar-width: none;
+    /* Money / input-group */
+    .content-body .input-group { display:flex!important; align-items:stretch!important; }
+    .content-body .input-group-text { background:var(--sf-2)!important; border:1.5px solid var(--bd-2)!important; border-right:none!important; border-radius:9px 0 0 9px!important; padding:0 11px!important; font-size:.8rem!important; font-weight:600!important; color:var(--tx-3)!important; display:flex!important; align-items:center!important; }
+    .content-body .input-group .form-control { border-radius:0 9px 9px 0!important; }
+
+    /* Validation */
+    .content-body .form-control.is-invalid,
+    .content-body input.is-invalid { border-color:var(--red)!important; box-shadow:0 0 0 3px rgba(220,38,38,0.09)!important; }
+    .content-body .invalid-feedback { font-size:.7rem; color:var(--red); margin-top:4px; font-weight:600; }
+    .content-body .form-text,.content-body small.text-muted { font-size:.69rem; color:var(--tx-4); margin-top:4px; display:block; }
+
+    /* Form footer buttons */
+    .content-footer { padding:.5rem 1.75rem 1.5rem; display:flex; align-items:center; gap:.55rem; flex-wrap:wrap; }
+    .content-footer .btn,
+    .content-footer a.btn,
+    .content-footer button.btn {
+        height:38px!important; padding:0 18px!important; border-radius:7px!important;
+        font-size:.8rem!important; font-weight:600!important;
+        font-family:'Plus Jakarta Sans',sans-serif!important;
+        display:inline-flex!important; align-items:center!important; gap:6px!important;
+        cursor:pointer!important; transition:var(--tr)!important;
+        border:1px solid transparent!important; text-decoration:none!important; white-space:nowrap!important;
     }
-    .si-nav::-webkit-scrollbar { display: none; }
+    .content-footer .btn-primary   { background:var(--blue)!important; color:#fff!important; border-color:var(--blue)!important; }
+    .content-footer .btn-primary:hover { background:var(--blue-dk)!important; border-color:var(--blue-dk)!important; color:#fff!important; }
+    .content-footer .btn-secondary { background:var(--sf-0)!important; color:var(--tx-2)!important; border-color:var(--bd-2)!important; }
+    .content-footer .btn-secondary:hover { background:var(--sf-2)!important; color:var(--tx-1)!important; }
+    .content-footer .btn-danger    { background:transparent!important; color:var(--red)!important; border-color:rgba(220,38,38,0.28)!important; }
+    .content-footer .btn-danger:hover { background:var(--red-bg)!important; }
 
-    .si-label {
-        font-size: 0.55rem;
-        font-weight: 600;
-        letter-spacing: 0.13em;
-        text-transform: uppercase;
-        color: var(--s-muted);
-        padding: 0.65rem 0.5rem 0.2rem;
-        flex-shrink: 0;
-    }
+    /* ═══════════════════════════════════════════════════════════
+       MODALS (moved to <body> via JS)
+    ═══════════════════════════════════════════════════════════ */
+    .modal-content { border:none; border-radius:14px; box-shadow:var(--e3); font-family:'Plus Jakarta Sans',sans-serif; }
+    .modal-header { padding:1rem 1.35rem; border-bottom:1px solid var(--bd-1); }
+    .modal-title  { font-size:.92rem; font-weight:700; color:var(--tx-1); }
+    .modal-body   { padding:1.2rem 1.35rem; font-size:.83rem; color:var(--tx-2); }
+    .modal-footer { padding:.8rem 1.35rem; border-top:1px solid var(--bd-1); gap:.45rem; }
+    .modal-backdrop { position:fixed!important; inset:0!important; z-index:9990!important; }
+    .modal { position:fixed!important; z-index:9995!important; }
+    body.modal-open { overflow:hidden!important; padding-right:0!important; }
+    .modal.fade:not(.show) { pointer-events:none; }
 
-    .si-link {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.38rem 0.6rem;
-        border-radius: 7px;
-        color: var(--s-text);
-        font-size: 0.77rem;
-        font-weight: 500;
-        border: 1px solid transparent;
-        transition: var(--tr);
-        flex-shrink: 0;
-        margin-bottom: 1px;
-        white-space: nowrap;
-        position: relative;
-        text-decoration: none;
-    }
+    /* ── Misc ── */
+    .table-responsive::-webkit-scrollbar { height:4px; }
+    .table-responsive::-webkit-scrollbar-thumb { background:var(--bd-2); border-radius:10px; }
+    :focus-visible { outline:2px solid var(--blue); outline-offset:2px; }
+    hr { border:none; border-top:1px solid var(--bd-1); margin:1.1rem 0; }
 
-    .si-link i {
-        width: 13px;
-        text-align: center;
-        font-size: 0.67rem;
-        color: var(--s-muted);
-        transition: color 0.13s;
-        flex-shrink: 0;
-    }
-
-    .si-link:hover { background: var(--s-hover); color: #fff; }
-    .si-link:hover i { color: rgba(79,142,247,0.9); }
-
-    .si-link.active {
-        background: var(--s-active-bg);
-        color: #fff;
-        border-color: var(--s-active-b);
-        box-shadow: 0 0 10px rgba(79,142,247,0.1);
-    }
-    .si-link.active i { color: rgba(110,165,255,1); }
-    .si-link.active::before {
-        content: '';
-        position: absolute;
-        left: 0; top: 22%; height: 56%;
-        width: 2.5px;
-        background: var(--blue);
-        border-radius: 0 3px 3px 0;
-        box-shadow: 0 0 8px rgba(79,142,247,0.5);
-    }
-
-    .si-footer {
-        flex-shrink: 0;
-        padding: 0.6rem 0.5rem 1rem;
-        position: relative;
-        z-index: 1;
-    }
-
-    .si-help {
-        background: rgba(79,142,247,0.07);
-        border: 1px solid rgba(79,142,247,0.18);
-        border-radius: 9px;
-        padding: 0.6rem 0.75rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: background 0.13s;
-        text-decoration: none;
-    }
-    .si-help:hover { background: rgba(79,142,247,0.13); }
-
-    .si-help-icon {
-        width: 26px; height: 26px;
-        border-radius: 7px;
-        background: linear-gradient(135deg, var(--blue), #6ee7f7);
-        display: flex; align-items: center; justify-content: center;
-        color: #fff; font-size: 0.65rem;
-        flex-shrink: 0;
-        box-shadow: 0 2px 8px rgba(79,142,247,0.3);
-    }
-    .si-help-title { font-size: 0.71rem; font-weight: 600; color: #fff; display: block; line-height: 1.2; }
-    .si-help-sub   { font-size: 0.61rem; color: var(--s-muted); display: block; }
-
-    /* TOPBAR - exact styles from your reference */
-    .topbar {
-        position: fixed;
-        top: 0;
-        left: var(--sidebar-w);
-        right: 0;
-        height: var(--topbar-h);
-        background: rgba(241,243,249,0.94);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border-bottom: 1px solid var(--bd-1);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 1.5rem;
-        z-index: 100;
-    }
-
-    .topbar-title {
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--tx-1);
-        letter-spacing: -0.01em;
-    }
-
-    .topbar-right {
-        display: flex;
-        align-items: center;
-        gap: 0.65rem;
-    }
-
-    .topbar-search {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
-
-    .topbar-search-ico {
-        position: absolute;
-        left: 9px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 0.68rem;
-        color: var(--tx-4);
-        pointer-events: none;
-        z-index: 1;
-        line-height: 1;
-    }
-
-    .topbar-search input {
-        all: unset;
-        box-sizing: border-box !important;
-        display: block !important;
-        width: 185px !important;
-        height: 32px !important;
-        padding: 0 0.75rem 0 1.9rem !important;
-        border: 1px solid var(--bd-1) !important;
-        border-radius: 100px !important;
-        background: var(--sf-0) !important;
-        font-family: 'Inter', sans-serif !important;
-        font-size: 0.76rem !important;
-        color: var(--tx-2) !important;
-        box-shadow: var(--e1) !important;
-        transition: border-color 0.15s, box-shadow 0.15s, width 0.2s !important;
-    }
-    .topbar-search input:focus {
-        border-color: rgba(79,142,247,0.45) !important;
-        box-shadow: 0 0 0 3px var(--blue-gl) !important;
-        outline: none !important;
-        width: 215px !important;
-    }
-    .topbar-search input::placeholder { color: var(--tx-5) !important; }
-
-    .topbar-icon-btn {
-        width: 33px; height: 33px;
-        border-radius: 50%;
-        background: var(--sf-0);
-        border: 1px solid var(--bd-1);
-        display: flex; align-items: center; justify-content: center;
-        cursor: pointer;
-        transition: var(--tr);
-        box-shadow: var(--e1);
-        flex-shrink: 0;
-    }
-    .topbar-icon-btn i { font-size: 0.73rem; color: var(--tx-3); }
-    .topbar-icon-btn:hover { border-color: rgba(79,142,247,0.3); box-shadow: 0 0 0 3px var(--blue-gl); }
-
-    .topbar-avatar {
-        width: 33px; height: 33px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--blue), #a78bfa);
-        display: flex; align-items: center; justify-content: center;
-        color: #fff; font-size: 0.73rem;
-        flex-shrink: 0;
-        box-shadow: 0 2px 10px rgba(79,142,247,0.3);
-    }
-
-    .topbar-user-name {
-        font-size: 0.78rem;
-        font-weight: 600;
-        color: var(--tx-1);
-    }
-
-    /* Flash messages */
-    .flash-msg {
-        padding: 0.75rem 1rem;
-        border-radius: var(--r2);
-        margin-bottom: 0.85rem;
-        font-size: 0.82rem;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    .flash-success { background: var(--green-bg); color: #155724; border: 1px solid rgba(47,179,68,0.2); }
-    .flash-error   { background: var(--red-bg);   color: #7f1d1d; border: 1px solid rgba(229,62,62,0.2); }
-    .flash-info    { background: var(--blue-gl);  color: #1e40af; border: 1px solid rgba(79,142,247,0.2); }
-
-    /* Scrollbar */
-    .datagrid-table-responsive::-webkit-scrollbar { height: 4px; }
-    .datagrid-table-responsive::-webkit-scrollbar-track { background: var(--sf-1); }
-    .datagrid-table-responsive::-webkit-scrollbar-thumb { background: var(--bd-2); border-radius: 10px; }
-
-    :focus-visible { outline: 2px solid var(--blue) !important; outline-offset: 2px !important; }
-    hr { border: none !important; border-top: 1px solid var(--bd-1) !important; margin: 1.25rem 0 !important; }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .content-wrapper, .ea-main, #content-wrapper {
-            padding-left: 0 !important;
-            padding-top: var(--topbar-h) !important;
-            width: 100% !important;
-        }
-        .topbar {
-            left: 0 !important;
-        }
-        .si {
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-        }
-        .si.show {
-            transform: translateX(0);
-        }
-        .datagrid-table-responsive { overflow-x: auto !important; }
-        .content-header h1 { font-size: 1rem !important; }
-        .datagrid-toolbar { flex-direction: column !important; align-items: stretch !important; }
+    @media(max-width:1200px){ .crm-stats{ grid-template-columns:repeat(2,1fr); } }
+    @media(max-width:768px){
+        .si { transform:translateX(-100%); transition:transform .3s ease; }
+        .si.open { transform:translateX(0); }
+        .our-topbar,.content-wrapper { left:0!important; }
+        .crm-stats { grid-template-columns:1fr; padding:1rem; }
     }
     </style>
     {% block stylesheets %}{% endblock %}
 {% endblock %}
 
+
 {% block body %}
-    <!-- SIDEBAR - exact from your reference -->
-    <aside class="si" id="si-sidebar">
-        <div class="si-brand">
-            <div class="si-brand-icon"><i class="fas fa-bolt"></i></div>
-            <span class="si-brand-name">Flash Ingénierie</span>
+
+{# ═══════════ SIDEBAR ═══════════ #}
+<aside class="si" id="si-sidebar">
+    <div class="si-brand">
+        <div class="si-brand-icon"><i class="fas fa-bolt"></i></div>
+        <span class="si-brand-name">Flash Ingénierie</span>
+        <span class="si-brand-badge">CRM</span>
+    </div>
+    <nav class="si-nav">
+        <div class="si-label">Principal</div>
+        <a href="{{ path('admin') }}"
+           class="si-link {% if app.request.attributes.get('_route') == 'admin' %}active{% endif %}">
+            <span class="si-ico"><i class="fas fa-chart-pie"></i></span>Dashboard
+        </a>
+
+        <div class="si-label">Leads</div>
+        <a href="{{ ea_url().unset('sort').unset('page').setController('App\\Controller\\Admin\\LeadCrudController').setAction('index') }}"
+           class="si-link {% if ea is defined and ea.crud is defined and ea.crud.controllerFqcn is defined and ea.crud.controllerFqcn == 'App\\Controller\\Admin\\LeadCrudController' %}active{% endif %}">
+            <span class="si-ico"><i class="fas fa-users"></i></span>Tous les leads
+        </a>
+        <a href="{{ ea_url().unset('sort').unset('page').setController('App\\Controller\\Admin\\LeadCrudController').setAction('new') }}"
+           class="si-link">
+            <span class="si-ico"><i class="fas fa-user-plus"></i></span>Nouveau lead
+        </a>
+
+        <div class="si-label">Gestion</div>
+        <a href="{{ ea_url().unset('sort').unset('page').setController('App\\Controller\\Admin\\EntityCrudController').setAction('index') }}"
+           class="si-link {% if ea is defined and ea.crud is defined and ea.crud.controllerFqcn is defined and ea.crud.controllerFqcn == 'App\\Controller\\Admin\\EntityCrudController' %}active{% endif %}">
+            <span class="si-ico"><i class="fas fa-building"></i></span>Entités
+        </a>
+        <a href="{{ ea_url().unset('sort').unset('page').setController('App\\Controller\\Admin\\ProjectCrudController').setAction('index') }}"
+           class="si-link {% if ea is defined and ea.crud is defined and ea.crud.controllerFqcn is defined and ea.crud.controllerFqcn == 'App\\Controller\\Admin\\ProjectCrudController' %}active{% endif %}">
+            <span class="si-ico"><i class="fas fa-folder-open"></i></span>Projets
+        </a>
+        <a href="{{ ea_url().unset('sort').unset('page').setController('App\\Controller\\Admin\\CampaignCrudController').setAction('index') }}"
+           class="si-link {% if ea is defined and ea.crud is defined and ea.crud.controllerFqcn is defined and ea.crud.controllerFqcn == 'App\\Controller\\Admin\\CampaignCrudController' %}active{% endif %}">
+            <span class="si-ico"><i class="fas fa-bullhorn"></i></span>Campagnes
+        </a>
+        <a href="{{ ea_url().unset('sort').unset('page').setController('App\\Controller\\Admin\\InteractionCrudController').setAction('index') }}"
+           class="si-link {% if ea is defined and ea.crud is defined and ea.crud.controllerFqcn is defined and ea.crud.controllerFqcn == 'App\\Controller\\Admin\\InteractionCrudController' %}active{% endif %}">
+            <span class="si-ico"><i class="fas fa-comments"></i></span>Interactions
+        </a>
+        <a href="{{ ea_url().unset('sort').unset('page').setController('App\\Controller\\Admin\\TaskCrudController').setAction('index') }}"
+           class="si-link {% if ea is defined and ea.crud is defined and ea.crud.controllerFqcn is defined and ea.crud.controllerFqcn == 'App\\Controller\\Admin\\TaskCrudController' %}active{% endif %}">
+            <span class="si-ico"><i class="fas fa-tasks"></i></span>Tâches
+        </a>
+        <a href="{{ ea_url().unset('sort').unset('page').setController('App\\Controller\\Admin\\TagCrudController').setAction('index') }}"
+           class="si-link {% if ea is defined and ea.crud is defined and ea.crud.controllerFqcn is defined and ea.crud.controllerFqcn == 'App\\Controller\\Admin\\TagCrudController' %}active{% endif %}">
+            <span class="si-ico"><i class="fas fa-tags"></i></span>Tags
+        </a>
+
+        <div class="si-label">Système</div>
+        <a href="{{ ea_url().unset('sort').unset('page').setController('App\\Controller\\Admin\\UserCrudController').setAction('index') }}"
+           class="si-link {% if ea is defined and ea.crud is defined and ea.crud.controllerFqcn is defined and ea.crud.controllerFqcn == 'App\\Controller\\Admin\\UserCrudController' %}active{% endif %}">
+            <span class="si-ico"><i class="fas fa-users-cog"></i></span>Utilisateurs
+        </a>
+    </nav>
+    <div class="si-user">
+        <div class="si-user-avatar"><i class="fas fa-user"></i></div>
+        <div class="si-user-info">
+            <span class="si-user-name">{{ app.user ? app.user.email|split('@')[0] : 'Admin' }}</span>
+            <span class="si-user-role">Administrateur</span>
         </div>
+        <a href="{{ path('app_logout') }}" class="si-user-logout" title="Déconnexion">
+            <i class="fas fa-sign-out-alt"></i>
+        </a>
+    </div>
+</aside>
 
-        <div class="si-hr"></div>
-
-        <nav class="si-nav">
-            <div class="si-label">Principal</div>
-            <a href="{{ path('admin') }}" class="si-link {% if app.request.attributes.get('_route') == 'admin' %}active{% endif %}">
-                <i class="fas fa-chart-pie"></i> Dashboard
-            </a>
-
-            <div class="si-label">Leads</div>
-            <a href="{{ ea_url().setController('App\\Controller\\Admin\\LeadCrudController').setAction('index') }}" 
-               class="si-link {% if ea.crud.controllerFqcn is defined and ea.crud.controllerFqcn == 'App\\Controller\\Admin\\LeadCrudController' %}active{% endif %}">
-                <i class="fas fa-users"></i> Tous les leads
-            </a>
-            <a href="{{ ea_url().setController('App\\Controller\\Admin\\LeadCrudController').setAction('new') }}" class="si-link">
-                <i class="fas fa-user-plus"></i> Nouveau lead
-            </a>
-
-            <div class="si-label">Gestion</div>
-            <a href="{{ ea_url().setController('App\\Controller\\Admin\\EntityCrudController').setAction('index') }}" 
-               class="si-link {% if ea.crud.controllerFqcn is defined and ea.crud.controllerFqcn == 'App\\Controller\\Admin\\EntityCrudController' %}active{% endif %}">
-                <i class="fas fa-building"></i> Entités
-            </a>
-            <a href="{{ ea_url().setController('App\\Controller\\Admin\\ProjectCrudController').setAction('index') }}" 
-               class="si-link {% if ea.crud.controllerFqcn is defined and ea.crud.controllerFqcn == 'App\\Controller\\Admin\\ProjectCrudController' %}active{% endif %}">
-                <i class="fas fa-folder-open"></i> Projets
-            </a>
-            <a href="{{ ea_url().setController('App\\Controller\\Admin\\CampaignCrudController').setAction('index') }}" 
-               class="si-link {% if ea.crud.controllerFqcn is defined and ea.crud.controllerFqcn == 'App\\Controller\\Admin\\CampaignCrudController' %}active{% endif %}">
-                <i class="fas fa-bullhorn"></i> Campagnes
-            </a>
-            <a href="{{ ea_url().setController('App\\Controller\\Admin\\InteractionCrudController').setAction('index') }}" 
-               class="si-link {% if ea.crud.controllerFqcn is defined and ea.crud.controllerFqcn == 'App\\Controller\\Admin\\InteractionCrudController' %}active{% endif %}">
-                <i class="fas fa-comments"></i> Interactions
-            </a>
-            <a href="{{ ea_url().setController('App\\Controller\\Admin\\TaskCrudController').setAction('index') }}" 
-               class="si-link {% if ea.crud.controllerFqcn is defined and ea.crud.controllerFqcn == 'App\\Controller\\Admin\\TaskCrudController' %}active{% endif %}">
-                <i class="fas fa-tasks"></i> Tâches
-            </a>
-            <a href="{{ ea_url().setController('App\\Controller\\Admin\\TagCrudController').setAction('index') }}" 
-               class="si-link {% if ea.crud.controllerFqcn is defined and ea.crud.controllerFqcn == 'App\\Controller\\Admin\\TagCrudController' %}active{% endif %}">
-                <i class="fas fa-tags"></i> Tags
-            </a>
-
-            <div class="si-label">Système</div>
-            <a href="{{ ea_url().setController('App\\Controller\\Admin\\UserCrudController').setAction('index') }}" 
-               class="si-link {% if ea.crud.controllerFqcn is defined and ea.crud.controllerFqcn == 'App\\Controller\\Admin\\UserCrudController' %}active{% endif %}">
-                <i class="fas fa-users-cog"></i> Utilisateurs
-            </a>
-            <a href="{{ path('app_logout') }}" class="si-link">
-                <i class="fas fa-sign-out-alt"></i> Déconnexion
-            </a>
-        </nav>
-
-        <div class="si-footer">
-            <a href="https://docs.example.com" target="_blank" class="si-help">
-                <div class="si-help-icon"><i class="fas fa-life-ring"></i></div>
-                <div>
-                    <span class="si-help-title">Besoin d'aide ?</span>
-                    <span class="si-help-sub">Documentation</span>
-                </div>
-            </a>
-        </div>
-    </aside>
-
-    <!-- TOPBAR - exact from your reference -->
-    <header class="topbar">
-        <span class="topbar-title">
-            {%- if ea is defined and ea.crud is defined and ea.crud.entityLabelInPlural is defined -%}
+{# ═══════════ TOPBAR ═══════════ #}
+<div class="our-topbar">
+    <span class="topbar-title">
+        {%- if ea is defined and ea.crud is defined -%}
+            {%- set action = ea.crud.currentPage ?? '' -%}
+            {%- if action == 'new' or action == 'edit' -%}
+                {{- ea.crud.currentPageTitle ?? 'Formulaire' -}}
+            {%- elseif ea.crud.entityLabelInPlural is defined -%}
                 {{- ea.crud.entityLabelInPlural -}}
-            {%- elseif app.request.attributes.get('_route') == 'admin' -%}
-                Dashboard
-            {%- elseif ea is defined and ea.crud is defined and ea.crud.currentAction is defined -%}
-                {{ ea.crud.entityLabelInSingular ?? 'Administration' }}
             {%- else -%}
-                Administration
+                {{- ea.crud.entityLabelInSingular ?? 'Administration' -}}
             {%- endif -%}
-        </span>
-        <div class="topbar-right">
-            <div class="topbar-search">
-                <i class="fas fa-search topbar-search-ico"></i>
-                <input type="text" id="global-search" placeholder="Rechercher...">
-            </div>
-            <div class="topbar-icon-btn"><i class="fas fa-bell"></i></div>
-            <div class="topbar-icon-btn"><i class="fas fa-cog"></i></div>
-            <div class="topbar-avatar"><i class="fas fa-user"></i></div>
-            <span class="topbar-user-name">{{ app.user ? app.user.email|split('@')[0] : 'Admin' }}</span>
+        {%- elseif app.request.attributes.get('_route') == 'admin' -%}
+            Dashboard
+        {%- else -%}
+            Administration
+        {%- endif -%}
+    </span>
+    <div class="topbar-right">
+        <div class="topbar-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="global-search" placeholder="Rechercher…" autocomplete="off">
         </div>
-    </header>
+        <button class="tb-icon-btn" title="Notifications"><i class="fas fa-bell"></i></button>
+        <div class="tb-divider"></div>
+        <div class="topbar-avatar"><i class="fas fa-user"></i></div>
+        <span class="topbar-user-name">{{ app.user ? app.user.email|split('@')[0] : 'Admin' }}</span>
+    </div>
+</div>
 
-    <!-- Flash messages - from your reference -->
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="flash-msg flash-{{ label == 'success' ? 'success' : (label == 'error' ? 'error' : 'info') }}">
-                <i class="fas fa-{{ label == 'success' ? 'check-circle' : (label == 'error' ? 'times-circle' : 'info-circle') }}"></i>
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endfor %}
+{# ═══════════ STATS TEMPLATES — hidden, cloned by JS ═══════════ #}
 
-    {# Render original EasyAdmin content #}
-    {{ parent() }}
+{# ── Leads : Nouveau / Contacté / Gagné / Perdu (from LeadCrudController) ── #}
+<template id="stats-leads">
+    <div class="crm-stats">
+        <div class="stat-card c-blue">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-users"></i></div><span class="stat-badge badge-up"><i class="fas fa-arrow-up"></i> 12%</span></div>
+            <div class="stat-value" data-stat="v">—</div><div class="stat-label">Total Leads</div>
+            <div class="stat-sub"><i class="fas fa-clock"></i> depuis le mois dernier</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="80"></div></div>
+        </div>
+        <div class="stat-card c-green">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-trophy"></i></div><span class="stat-badge badge-up"><i class="fas fa-arrow-up"></i> 8%</span></div>
+            <div class="stat-value" data-stat="won">—</div><div class="stat-label">Leads Gagnés</div>
+            <div class="stat-sub"><i class="fas fa-clock"></i> depuis le mois dernier</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="55"></div></div>
+        </div>
+        <div class="stat-card c-amber">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-spinner"></i></div><span class="stat-badge badge-up"><i class="fas fa-arrow-up"></i> 5%</span></div>
+            <div class="stat-value" data-stat="ongoing">—</div><div class="stat-label">En Cours</div>
+            <div class="stat-sub"><i class="fas fa-calendar-week"></i> cette semaine</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="62"></div></div>
+        </div>
+        <div class="stat-card c-red">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-times-circle"></i></div><span class="stat-badge badge-down"><i class="fas fa-arrow-down"></i> 2%</span></div>
+            <div class="stat-value" data-stat="lost">—</div><div class="stat-label">Leads Perdus</div>
+            <div class="stat-sub"><i class="fas fa-clock"></i> depuis le mois dernier</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="22"></div></div>
+        </div>
+    </div>
+</template>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    
-    <script>
-    // ── LAYOUT FIX: fixed scroll container approach ────────────────
-    (function() {
-        function fixLayout() {
-            // Hide EA's sidebar/topbar completely
-            var hideSels = ['.ea-sidebar', 'aside.ea-sidebar', '#sidebar',
-                            '.sidebar-wrapper', '.main-sidebar',
-                            'header.navbar', 'nav.navbar', '.content-top'];
-            hideSels.forEach(function(sel) {
-                document.querySelectorAll(sel).forEach(function(el) {
-                    el.style.setProperty('display',   'none',  'important');
-                    el.style.setProperty('width',     '0',     'important');
-                    el.style.setProperty('min-width', '0',     'important');
-                    el.style.setProperty('flex',      '0 0 0px','important');
-                    el.style.setProperty('padding',   '0',     'important');
-                    el.style.setProperty('margin',    '0',     'important');
-                });
-            });
+{# ── Projects : En cours / Terminé / Annulé (from ProjectCrudController) ── #}
+<template id="stats-projects">
+    <div class="crm-stats">
+        <div class="stat-card c-blue">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-folder-open"></i></div><span class="stat-badge badge-neutral"><i class="fas fa-minus"></i> 0%</span></div>
+            <div class="stat-value" data-stat="v">—</div><div class="stat-label">Total Projets</div>
+            <div class="stat-sub"><i class="fas fa-clock"></i> tous les projets</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="100"></div></div>
+        </div>
+        <div class="stat-card c-amber">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-spinner"></i></div><span class="stat-badge badge-up"><i class="fas fa-arrow-up"></i> 5%</span></div>
+            <div class="stat-value" data-stat="ongoing">—</div><div class="stat-label">En Cours</div>
+            <div class="stat-sub"><i class="fas fa-calendar-week"></i> cette semaine</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="65"></div></div>
+        </div>
+        <div class="stat-card c-green">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-check-circle"></i></div><span class="stat-badge badge-up"><i class="fas fa-arrow-up"></i> 3%</span></div>
+            <div class="stat-value" data-stat="done">—</div><div class="stat-label">Terminés</div>
+            <div class="stat-sub"><i class="fas fa-clock"></i> depuis le mois dernier</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="40"></div></div>
+        </div>
+        <div class="stat-card c-red">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-ban"></i></div><span class="stat-badge badge-down"><i class="fas fa-arrow-down"></i> 1%</span></div>
+            <div class="stat-value" data-stat="cancelled">—</div><div class="stat-label">Annulés</div>
+            <div class="stat-sub"><i class="fas fa-clock"></i> depuis le mois dernier</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="10"></div></div>
+        </div>
+    </div>
+</template>
 
-            // Make content wrapper a fixed scroll container covering the right area
-            var contentSels = ['.content-wrapper', '.ea-main', '#content-wrapper'];
-            contentSels.forEach(function(sel) {
-                document.querySelectorAll(sel).forEach(function(el) {
-                    el.style.setProperty('position',   'fixed',            'important');
-                    el.style.setProperty('top',        '56px',             'important');
-                    el.style.setProperty('left',       '220px',            'important');
-                    el.style.setProperty('right',      '0',                'important');
-                    el.style.setProperty('bottom',     '0',                'important');
-                    el.style.setProperty('width',      'auto',             'important');
-                    el.style.setProperty('height',     'auto',             'important');
-                    el.style.setProperty('overflow-y', 'auto',             'important');
-                    el.style.setProperty('overflow-x', 'auto',             'important');
-                    el.style.setProperty('margin',     '0',                'important');
-                    el.style.setProperty('padding',    '0',                'important');
-                    el.style.setProperty('background', '#f1f3f9',          'important');
-                    el.style.setProperty('z-index',    '1',                'important');
-                    el.style.setProperty('box-sizing', 'border-box',       'important');
-                });
-            });
-        }
+{# ── Campaigns : Active / Terminée + type Email (from CampaignCrudController) ── #}
+<template id="stats-campaigns">
+    <div class="crm-stats">
+        <div class="stat-card c-blue">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-bullhorn"></i></div><span class="stat-badge badge-neutral"><i class="fas fa-minus"></i> 0%</span></div>
+            <div class="stat-value" data-stat="v">—</div><div class="stat-label">Total Campagnes</div>
+            <div class="stat-sub"><i class="fas fa-clock"></i> toutes</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="100"></div></div>
+        </div>
+        <div class="stat-card c-green">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-play-circle"></i></div><span class="stat-badge badge-up"><i class="fas fa-arrow-up"></i> 4%</span></div>
+            <div class="stat-value" data-stat="active">—</div><div class="stat-label">Actives</div>
+            <div class="stat-sub"><i class="fas fa-calendar-week"></i> en ce moment</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="60"></div></div>
+        </div>
+        <div class="stat-card c-amber">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-flag-checkered"></i></div><span class="stat-badge badge-neutral"><i class="fas fa-minus"></i> 0%</span></div>
+            <div class="stat-value" data-stat="done">—</div><div class="stat-label">Terminées</div>
+            <div class="stat-sub"><i class="fas fa-clock"></i> depuis le début</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="40"></div></div>
+        </div>
+        <div class="stat-card c-violet">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-envelope"></i></div><span class="stat-badge badge-neutral"><i class="fas fa-minus"></i> 0%</span></div>
+            <div class="stat-value" data-stat="email">—</div><div class="stat-label">Campagnes Email</div>
+            <div class="stat-sub"><i class="fas fa-tag"></i> type Email</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="30"></div></div>
+        </div>
+    </div>
+</template>
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', fixLayout);
-        } else {
-            fixLayout();
-        }
-        window.addEventListener('load', fixLayout);
-    })();
-    </script>
+{# ── Tasks : À faire / En cours / Terminée (from TaskCrudController) ── #}
+<template id="stats-tasks">
+    <div class="crm-stats">
+        <div class="stat-card c-blue">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-tasks"></i></div><span class="stat-badge badge-neutral"><i class="fas fa-minus"></i> 0%</span></div>
+            <div class="stat-value" data-stat="v">—</div><div class="stat-label">Total Tâches</div>
+            <div class="stat-sub"><i class="fas fa-clock"></i> toutes</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="100"></div></div>
+        </div>
+        <div class="stat-card c-amber">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-hourglass-half"></i></div><span class="stat-badge badge-up"><i class="fas fa-arrow-up"></i> 6%</span></div>
+            <div class="stat-value" data-stat="todo">—</div><div class="stat-label">À Faire</div>
+            <div class="stat-sub"><i class="fas fa-calendar-week"></i> cette semaine</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="50"></div></div>
+        </div>
+        <div class="stat-card c-cyan">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-spinner"></i></div><span class="stat-badge badge-up"><i class="fas fa-arrow-up"></i> 3%</span></div>
+            <div class="stat-value" data-stat="ongoing">—</div><div class="stat-label">En Cours</div>
+            <div class="stat-sub"><i class="fas fa-calendar-week"></i> en ce moment</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="35"></div></div>
+        </div>
+        <div class="stat-card c-green">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-check-double"></i></div><span class="stat-badge badge-up"><i class="fas fa-arrow-up"></i> 8%</span></div>
+            <div class="stat-value" data-stat="done">—</div><div class="stat-label">Terminées</div>
+            <div class="stat-sub"><i class="fas fa-clock"></i> depuis le mois dernier</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="70"></div></div>
+        </div>
+    </div>
+</template>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Search functionality
-        const searchInput = document.getElementById('global-search');
-        if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                const query = this.value.toLowerCase();
-                document.querySelectorAll('.datagrid tbody tr').forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    row.style.display = text.includes(query) ? '' : 'none';
-                });
-            });
-        }
+{# ── Interactions : Appel / Email / Réunion (from InteractionCrudController) ── #}
+<template id="stats-interactions">
+    <div class="crm-stats">
+        <div class="stat-card c-blue">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-comments"></i></div><span class="stat-badge badge-neutral"><i class="fas fa-minus"></i></span></div>
+            <div class="stat-value" data-stat="v">—</div><div class="stat-label">Total Interactions</div>
+            <div class="stat-sub"><i class="fas fa-clock"></i> toutes</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="100"></div></div>
+        </div>
+        <div class="stat-card c-green">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-phone"></i></div><span class="stat-badge badge-neutral"><i class="fas fa-minus"></i></span></div>
+            <div class="stat-value" data-stat="calls">—</div><div class="stat-label">Appels</div>
+            <div class="stat-sub"><i class="fas fa-tag"></i> type Appel</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="45"></div></div>
+        </div>
+        <div class="stat-card c-amber">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-envelope"></i></div><span class="stat-badge badge-neutral"><i class="fas fa-minus"></i></span></div>
+            <div class="stat-value" data-stat="emails">—</div><div class="stat-label">Emails</div>
+            <div class="stat-sub"><i class="fas fa-tag"></i> type Email</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="30"></div></div>
+        </div>
+        <div class="stat-card c-violet">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-calendar-alt"></i></div><span class="stat-badge badge-neutral"><i class="fas fa-minus"></i></span></div>
+            <div class="stat-value" data-stat="meetings">—</div><div class="stat-label">Réunions</div>
+            <div class="stat-sub"><i class="fas fa-tag"></i> type Réunion</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="20"></div></div>
+        </div>
+    </div>
+</template>
 
-        // Update active link in sidebar
-        const currentPath = window.location.pathname;
-        document.querySelectorAll('.si-link').forEach(link => {
-            if (link.getAttribute('href') === currentPath) {
-                link.classList.add('active');
-            }
+{# ── Entities : isActive (from EntityCrudController) ── #}
+<template id="stats-entities">
+    <div class="crm-stats">
+        <div class="stat-card c-blue">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-building"></i></div><span class="stat-badge badge-neutral"><i class="fas fa-minus"></i></span></div>
+            <div class="stat-value" data-stat="v">—</div><div class="stat-label">Total Entités</div>
+            <div class="stat-sub"><i class="fas fa-clock"></i> enregistrées</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="100"></div></div>
+        </div>
+        <div class="stat-card c-green">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-check-circle"></i></div><span class="stat-badge badge-up"><i class="fas fa-arrow-up"></i> 2%</span></div>
+            <div class="stat-value" data-stat="active">—</div><div class="stat-label">Actives</div>
+            <div class="stat-sub"><i class="fas fa-clock"></i> depuis le mois dernier</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="80"></div></div>
+        </div>
+        <div class="stat-card c-red">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-times-circle"></i></div><span class="stat-badge badge-neutral"><i class="fas fa-minus"></i></span></div>
+            <div class="stat-value" data-stat="inactive">—</div><div class="stat-label">Inactives</div>
+            <div class="stat-sub"><i class="fas fa-clock"></i> depuis le mois dernier</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="20"></div></div>
+        </div>
+        <div class="stat-card c-amber">
+            <div class="stat-top"><div class="stat-icon"><i class="fas fa-user-tie"></i></div><span class="stat-badge badge-neutral"><i class="fas fa-minus"></i></span></div>
+            <div class="stat-value" data-stat="users">—</div><div class="stat-label">Utilisateurs</div>
+            <div class="stat-sub"><i class="fas fa-users"></i> associés</div>
+            <div class="stat-bar"><div class="stat-bar-fill" data-w="60"></div></div>
+        </div>
+    </div>
+</template>
+
+{{ parent() }}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function(){
+    var BASE = window.location.pathname.split('?')[0];
+
+    /* ── Which controller / action is active? ── */
+    function getCtx(){
+        var p = new URLSearchParams(window.location.search);
+        var c = p.get('crudControllerFqcn') || '';
+        var a = p.get('crudAction') || '';
+        return { ctrl: c, action: a };
+    }
+
+    /* ── Move modals to <body> to escape stacking context ── */
+    function escapModals(){
+        document.querySelectorAll('.content-wrapper .modal, .wrapper .modal').forEach(function(m){
+            if(m.parentElement !== document.body) document.body.appendChild(m);
         });
+    }
 
-        // Fix delete confirmation modal
-        const deleteModalTitle = document.getElementById('action-confirmation-title');
-        if (deleteModalTitle) {
-            deleteModalTitle.textContent = 'Êtes-vous sûr de vouloir supprimer cet élément ?';
+    /* ── Inject stats after .content-header (index pages only) ── */
+    function injectStats(){
+        var ctx = getCtx();
+        // Skip dashboard (no crudControllerFqcn) and form pages
+        if(!ctx.ctrl) return;
+        if(ctx.action && ctx.action !== 'index') return;
+        // Already injected?
+        if(document.querySelector('.crm-stats')) return;
+
+        var header = document.querySelector('.content-wrapper section.content-header');
+        if(!header) return;
+
+        /* Choose the right template */
+        var tplId = null;
+        if(ctx.ctrl.indexOf('LeadCrud')        !== -1) tplId = 'stats-leads';
+        if(ctx.ctrl.indexOf('ProjectCrud')     !== -1) tplId = 'stats-projects';
+        if(ctx.ctrl.indexOf('CampaignCrud')    !== -1) tplId = 'stats-campaigns';
+        if(ctx.ctrl.indexOf('TaskCrud')        !== -1) tplId = 'stats-tasks';
+        if(ctx.ctrl.indexOf('InteractionCrud') !== -1) tplId = 'stats-interactions';
+        if(ctx.ctrl.indexOf('EntityCrud')      !== -1) tplId = 'stats-entities';
+        if(!tplId) return;
+
+        var tpl = document.getElementById(tplId);
+        if(!tpl) return;
+
+        var clone = tpl.content.cloneNode(true);
+        header.parentNode.insertBefore(clone, header.nextSibling);
+
+        /* Animate bars */
+        setTimeout(function(){
+            document.querySelectorAll('.crm-stats .stat-bar-fill').forEach(function(el){
+                el.style.width = (el.dataset.w || 50) + '%';
+            });
+        }, 320);
+
+        /* Populate numbers */
+        populateStats(ctx.ctrl);
+    }
+
+    /* ── XHR helper: fetch an EA index page and extract total count ── */
+    function fetchCount(ctrl, extra, cb){
+        var url = BASE + '?crudControllerFqcn=' + encodeURIComponent(ctrl) +
+                  '&crudAction=index&page=1' + (extra || '');
+        var x = new XMLHttpRequest();
+        x.open('GET', url, true);
+        x.onload = function(){
+            if(x.status !== 200){ cb('?'); return; }
+            /* EA renders something like "9 résultats" or similar */
+            var m = x.responseText.match(/(\d[\d\s]*)\s+r(?:é|e)sultat/i);
+            cb(m ? m[1].replace(/\s/g,'') : '?');
+        };
+        x.onerror = function(){ cb('?'); };
+        x.send();
+    }
+
+    function setVal(attr, val){
+        var el = document.querySelector('.crm-stats [data-stat="'+attr+'"]');
+        if(el) el.textContent = val;
+    }
+
+    /* Exact status values from each controller's setChoices() */
+    function populateStats(ctrl){
+        if(ctrl.indexOf('LeadCrud') !== -1){
+            var LC = 'App\\Controller\\Admin\\LeadCrudController';
+            fetchCount(LC, '', function(n){ setVal('v', n); });
+            /* Lead statuses: Gagné / Contacté / Perdu */
+            fetchCount(LC, '&filters[status]=Gagn%C3%A9',    function(n){ setVal('won',     n); });
+            fetchCount(LC, '&filters[status]=Contact%C3%A9', function(n){ setVal('ongoing',  n); });
+            fetchCount(LC, '&filters[status]=Perdu',         function(n){ setVal('lost',     n); });
         }
-        
-        // Fix batch action modal
-        const batchModalTitle = document.getElementById('batch-action-confirmation-title');
-        if (batchModalTitle) {
-            batchModalTitle.textContent = 'Vous allez appliquer cette action à plusieurs éléments';
+        else if(ctrl.indexOf('ProjectCrud') !== -1){
+            var PC = 'App\\Controller\\Admin\\ProjectCrudController';
+            fetchCount(PC, '', function(n){ setVal('v', n); });
+            /* Project statuses: En cours / Terminé / Annulé */
+            fetchCount(PC, '&filters[status]=En+cours',       function(n){ setVal('ongoing',   n); });
+            fetchCount(PC, '&filters[status]=Termin%C3%A9',   function(n){ setVal('done',       n); });
+            fetchCount(PC, '&filters[status]=Annul%C3%A9',    function(n){ setVal('cancelled',  n); });
         }
-        
-        // Fix modal buttons
-        const modalConfirmBtn = document.getElementById('modal-action-confirmation-button');
-        if (modalConfirmBtn) {
-            const btnLabel = modalConfirmBtn.querySelector('.btn-label');
-            if (btnLabel) btnLabel.textContent = 'Confirmer';
+        else if(ctrl.indexOf('CampaignCrud') !== -1){
+            var CC = 'App\\Controller\\Admin\\CampaignCrudController';
+            fetchCount(CC, '', function(n){ setVal('v', n); });
+            fetchCount(CC, '&filters[status]=Active',           function(n){ setVal('active', n); });
+            fetchCount(CC, '&filters[status]=Termin%C3%A9e',    function(n){ setVal('done',   n); });
+            fetchCount(CC, '&filters[type]=Email',              function(n){ setVal('email',  n); });
         }
-        
-        const batchConfirmBtn = document.getElementById('modal-batch-action-button');
-        if (batchConfirmBtn) {
-            const btnLabel = batchConfirmBtn.querySelector('.btn-label');
-            if (btnLabel) btnLabel.textContent = 'Confirmer';
+        else if(ctrl.indexOf('TaskCrud') !== -1){
+            var TC = 'App\\Controller\\Admin\\TaskCrudController';
+            fetchCount(TC, '', function(n){ setVal('v', n); });
+            /* Task statuses: À faire / En cours / Terminée */
+            fetchCount(TC, '&filters[status]=%C3%80+faire',    function(n){ setVal('todo',    n); });
+            fetchCount(TC, '&filters[status]=En+cours',        function(n){ setVal('ongoing', n); });
+            fetchCount(TC, '&filters[status]=Termin%C3%A9e',   function(n){ setVal('done',    n); });
         }
-        
-        // Fix cancel buttons
-        document.querySelectorAll('[data-bs-dismiss="modal"] .btn-label').forEach(btn => {
-            if (btn.textContent.includes('Cancel')) {
-                btn.textContent = 'Annuler';
-            }
+        else if(ctrl.indexOf('InteractionCrud') !== -1){
+            var IC = 'App\\Controller\\Admin\\InteractionCrudController';
+            fetchCount(IC, '', function(n){ setVal('v', n); });
+            /* Interaction types: Appel / Email / Réunion */
+            fetchCount(IC, '&filters[type]=Appel',              function(n){ setVal('calls',    n); });
+            fetchCount(IC, '&filters[type]=Email',              function(n){ setVal('emails',   n); });
+            fetchCount(IC, '&filters[type]=R%C3%A9union',       function(n){ setVal('meetings', n); });
+        }
+        else if(ctrl.indexOf('EntityCrud') !== -1){
+            var EC = 'App\\Controller\\Admin\\EntityCrudController';
+            fetchCount(EC, '', function(n){ setVal('v', n); });
+            fetchCount(EC, '&filters[isActive]=1', function(n){ setVal('active',   n); });
+            fetchCount(EC, '&filters[isActive]=0', function(n){ setVal('inactive', n); });
+            fetchCount('App\\Controller\\Admin\\UserCrudController', '',
+                       function(n){ setVal('users', n); });
+        }
+    }
+
+    /* ── Fix EA layout ── */
+    function fixLayout(){
+        ['.ea-sidebar','aside.ea-sidebar','.sidebar-wrapper',
+         'header.navbar','nav.navbar','.content-top','.responsive-header'
+        ].forEach(function(sel){
+            document.querySelectorAll(sel).forEach(function(el){
+                el.style.setProperty('display','none','important');
+                el.style.setProperty('width','0','important');
+            });
         });
-        
-        // Fix results text
-        const resultsElement = document.querySelector('.list-pagination-counter');
-        if (resultsElement) {
-            const match = resultsElement.innerHTML.match(/<strong>(.*?)<\/strong>/);
-            if (match) {
-                const count = match[1];
-                resultsElement.innerHTML = `<strong>${count}</strong> résultats`;
-            }
+        var cw = document.querySelector('.content-wrapper');
+        if(cw){
+            cw.style.setProperty('position','fixed','important');
+            cw.style.setProperty('top','56px','important');
+            cw.style.setProperty('left','240px','important');
+            cw.style.setProperty('right','0','important');
+            cw.style.setProperty('bottom','0','important');
+            cw.style.setProperty('width','auto','important');
+            cw.style.setProperty('height','auto','important');
+            cw.style.setProperty('overflow-y','auto','important');
+            cw.style.setProperty('overflow-x','auto','important');
+            cw.style.setProperty('margin','0','important');
+            cw.style.setProperty('padding','0','important');
+            cw.style.setProperty('background','#f0f4ff','important');
+            cw.style.setProperty('z-index','1','important');
+        }
+        escapModals();
+        injectStats();
+    }
+
+    if(document.readyState === 'loading'){
+        document.addEventListener('DOMContentLoaded', fixLayout);
+    } else { fixLayout(); }
+    window.addEventListener('load', fixLayout);
+
+    /* Catch lazy modals */
+    document.addEventListener('click', function(e){
+        if(e.target.closest('.action-delete,[data-bs-toggle="modal"]')){
+            setTimeout(escapModals, 40);
+            setTimeout(escapModals, 200);
         }
     });
-    </script>
-    
-    {% block javascripts %}{% endblock %}
+
+    /* Global table search */
+    document.addEventListener('DOMContentLoaded', function(){
+        var inp = document.getElementById('global-search');
+        if(inp){
+            var t;
+            inp.addEventListener('input', function(){
+                clearTimeout(t);
+                t = setTimeout(function(){
+                    var q = inp.value.toLowerCase().trim();
+                    document.querySelectorAll('.datagrid tbody tr').forEach(function(r){
+                        r.style.display = (!q || r.textContent.toLowerCase().includes(q)) ? '' : 'none';
+                    });
+                }, 320);
+            });
+        }
+
+        /* ========== MODAL LOCALISATION (FIXED) ========== */
+        function localiseModals() {
+            // Titles
+            var titleMap = {
+                'action-confirmation-title'      : 'Êtes-vous sûr de vouloir supprimer cet élément ?',
+                'batch-action-confirmation-title': 'Appliquer cette action aux éléments sélectionnés',
+            };
+            Object.keys(titleMap).forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.textContent = titleMap[id];
+            });
+
+            // Body message (delete modal)
+            var bodyEl = document.querySelector('#modal-action-confirmation .modal-body');
+            if (bodyEl) {
+                bodyEl.textContent = 'Cette action est irréversible.';
+            }
+
+            // Confirm buttons
+            ['modal-action-confirmation-button', 'modal-batch-action-button'].forEach(function(id) {
+                var btn = document.getElementById(id);
+                if (btn) {
+                    var label = btn.querySelector('.btn-label');
+                    if (label) label.textContent = 'Confirmer';
+                }
+            });
+
+            // Cancel buttons (any button with data-bs-dismiss="modal")
+            document.querySelectorAll('[data-bs-dismiss="modal"] .btn-label').forEach(function(el) {
+                if (/cancel/i.test(el.textContent)) {
+                    el.textContent = 'Annuler';
+                }
+            });
+        }
+
+        // Run on page load
+        localiseModals();
+
+        // Also run after a modal is triggered (delete click)
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.action-delete, [data-bs-toggle="modal"]')) {
+                setTimeout(localiseModals, 100);
+            }
+        });
+        /* ================================================= */
+    });
+})();
+</script>
+
+{% block javascripts %}{% endblock %}
 {% endblock %}

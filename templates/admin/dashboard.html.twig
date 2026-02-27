@@ -1,15 +1,10 @@
 {% extends 'admin/layout.html.twig' %}
 
 {% block title %}Dashboard — Flash Ingénierie{% endblock %}
-{% block page_title %}Tableau de bord{% endblock %}
 
 {% block stylesheets %}
 <style>
-/* ═══════════════════════════════════════════
-   DASHBOARD STYLES
-═══════════════════════════════════════════ */
-
-/* ── Page header ── */
+/* ── Page header ─────────────────────────────────────────────── */
 .d-header {
     display: flex;
     align-items: flex-end;
@@ -19,72 +14,54 @@
     margin-bottom: 1.5rem;
 }
 
-.d-header-left h1 {
-    font-size: 1.35rem;
-    font-weight: 800;
-    color: var(--text-h);
-    letter-spacing: -0.025em;
-    margin-bottom: 0.15rem;
-}
-
-.d-header-left p {
-    font-size: 0.75rem;
-    color: var(--text-m);
-}
-
 .badge-date {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    background: var(--card);
-    border: 1px solid var(--border);
+    background: var(--sf-0);
+    border: 1px solid var(--bd-1);
     border-radius: 100px;
     padding: 0.35rem 0.85rem;
     font-size: 0.7rem;
     font-weight: 500;
-    color: var(--text-b);
-    box-shadow: var(--shadow-sm);
+    color: var(--tx-2);
+    box-shadow: var(--e1);
 }
-
 .badge-date i { color: var(--blue); font-size: 0.65rem; }
 
-/* ── KPI grid ── */
+/* ── KPI grid ────────────────────────────────────────────────── */
 .kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
     margin-bottom: 1.25rem;
 }
-
-@media (max-width: 1080px) { .kpi-grid { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 1080px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px)  { .kpi-grid { grid-template-columns: 1fr; } }
 
 .kpi-card {
-    background: var(--card);
-    border-radius: var(--radius);
+    background: var(--sf-0);
+    border-radius: var(--r3);
     padding: 1.15rem 1.25rem;
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--bd-1);
+    box-shadow: var(--e1);
     position: relative;
     overflow: hidden;
     transition: transform 0.18s, box-shadow 0.18s;
 }
+.kpi-card:hover { transform: translateY(-3px); box-shadow: var(--e2); }
 
-.kpi-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
-
-/* top color stripe */
 .kpi-card::after {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 3px;
-    border-radius: var(--radius) var(--radius) 0 0;
+    border-radius: var(--r3) var(--r3) 0 0;
 }
-
-.kpi-blue::after   { background: linear-gradient(90deg,#4f8ef7,#6ee7f7); }
-.kpi-indigo::after { background: linear-gradient(90deg,#6c47ff,#a78bfa); }
-.kpi-cyan::after   { background: linear-gradient(90deg,#0ea5e9,#38bdf8); }
-.kpi-slate::after  { background: linear-gradient(90deg,#475569,#94a3b8); }
+.kpi-blue::after   { background: linear-gradient(90deg, #4f8ef7, #6ee7f7); }
+.kpi-indigo::after { background: linear-gradient(90deg, #6c47ff, #a78bfa); }
+.kpi-cyan::after   { background: linear-gradient(90deg, #0ea5e9, #38bdf8); }
+.kpi-slate::after  { background: linear-gradient(90deg, #475569, #94a3b8); }
 
 .kpi-top {
     display: flex;
@@ -99,7 +76,6 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 0.8rem;
 }
-
 .kpi-blue   .kpi-icon { background: rgba(79,142,247,0.1);  color: #4f8ef7; }
 .kpi-indigo .kpi-icon { background: rgba(108,71,255,0.1);  color: #6c47ff; }
 .kpi-cyan   .kpi-icon { background: rgba(14,165,233,0.1);  color: #0ea5e9; }
@@ -111,59 +87,47 @@
     padding: 0.17rem 0.45rem;
     border-radius: 100px;
 }
-
 .pill-up   { background: rgba(34,197,94,0.1);  color: #16a34a; }
 .pill-down { background: rgba(239,68,68,0.1);  color: #dc2626; }
 
 .kpi-value {
     font-size: 1.9rem;
     font-weight: 800;
-    color: var(--text-h);
+    color: var(--tx-1);
     letter-spacing: -0.04em;
     line-height: 1;
     margin-bottom: 0.18rem;
 }
-
 .kpi-label {
     font-size: 0.68rem;
     font-weight: 500;
-    color: var(--text-m);
+    color: var(--tx-3);
     text-transform: uppercase;
     letter-spacing: 0.07em;
 }
-
 .kpi-sub {
     margin-top: 0.75rem;
     padding-top: 0.65rem;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--bd-1);
     font-size: 0.65rem;
-    color: var(--text-m);
+    color: var(--tx-3);
 }
 
-/* ── Chart layout ── */
-.chart-row {
-    display: grid;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
+/* ── Chart layout ────────────────────────────────────────────── */
+.chart-row { display: grid; gap: 1rem; margin-bottom: 1rem; }
 .cr-7-5 { grid-template-columns: 7fr 5fr; }
 .cr-5-7 { grid-template-columns: 5fr 7fr; }
-
-@media (max-width: 920px) {
-    .cr-7-5, .cr-5-7 { grid-template-columns: 1fr; }
-}
+@media (max-width: 920px) { .cr-7-5, .cr-5-7 { grid-template-columns: 1fr; } }
 
 .chart-card {
-    background: var(--card);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-sm);
+    background: var(--sf-0);
+    border-radius: var(--r3);
+    border: 1px solid var(--bd-1);
+    box-shadow: var(--e1);
     overflow: hidden;
     transition: box-shadow 0.18s;
 }
-
-.chart-card:hover { box-shadow: var(--shadow-md); }
+.chart-card:hover { box-shadow: var(--e2); }
 
 .cc-head {
     padding: 1.1rem 1.25rem 0;
@@ -171,45 +135,46 @@
     align-items: center;
     justify-content: space-between;
 }
-
 .cc-head-info small {
     display: block;
     font-size: 0.57rem;
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--text-m);
+    color: var(--tx-3);
     margin-bottom: 0.12rem;
 }
-
 .cc-head-info strong {
     font-size: 0.9rem;
     font-weight: 700;
-    color: var(--text-h);
+    color: var(--tx-1);
 }
-
-.cc-body {
-    padding: 0.75rem 1.25rem 1.25rem;
-}
-
+.cc-body { padding: 0.75rem 1.25rem 1.25rem; }
 .cc-body canvas { max-height: 220px; }
 </style>
 {% endblock %}
 
 {% block main %}
 
-<!-- Header -->
 <div class="d-header">
-    
     <div class="badge-date">
         <i class="fas fa-calendar-alt"></i>
         {{ "now"|date("d/m/Y") }}
     </div>
 </div>
 
+{# Flash messages in content flow #}
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="flash-msg flash-{{ label == 'success' ? 'success' : (label == 'error' ? 'error' : 'info') }}">
+            <i class="fas fa-{{ label == 'success' ? 'check-circle' : (label == 'error' ? 'times-circle' : 'info-circle') }}"></i>
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endfor %}
+
 <!-- KPI Cards -->
 <div class="kpi-grid">
-
     <div class="kpi-card kpi-blue">
         <div class="kpi-top">
             <div class="kpi-icon"><i class="fas fa-users"></i></div>
@@ -219,7 +184,6 @@
         <div class="kpi-label">Total Leads</div>
         <div class="kpi-sub">depuis le mois dernier</div>
     </div>
-
     <div class="kpi-card kpi-indigo">
         <div class="kpi-top">
             <div class="kpi-icon"><i class="fas fa-check-circle"></i></div>
@@ -229,7 +193,6 @@
         <div class="kpi-label">Leads Gagnés</div>
         <div class="kpi-sub">depuis le mois dernier</div>
     </div>
-
     <div class="kpi-card kpi-cyan">
         <div class="kpi-top">
             <div class="kpi-icon"><i class="fas fa-hourglass-half"></i></div>
@@ -239,7 +202,6 @@
         <div class="kpi-label">En Cours</div>
         <div class="kpi-sub">cette semaine</div>
     </div>
-
     <div class="kpi-card kpi-slate">
         <div class="kpi-top">
             <div class="kpi-icon"><i class="fas fa-times-circle"></i></div>
@@ -249,12 +211,10 @@
         <div class="kpi-label">Leads Perdus</div>
         <div class="kpi-sub">depuis le mois dernier</div>
     </div>
-
 </div>
 
 <!-- Charts Row 1 -->
 <div class="chart-row cr-7-5">
-
     <div class="chart-card">
         <div class="cc-head">
             <div class="cc-head-info">
@@ -263,10 +223,13 @@
             </div>
         </div>
         <div class="cc-body">
-            <canvas id="chartEvolution"></canvas>
+            {# Data passed as JSON in data attributes — no inline JS, lazy init below #}
+            <canvas id="chartEvolution"
+                    data-labels="{{ evolutionMois|map(i => i.mois)|json_encode }}"
+                    data-values="{{ evolutionMois|map(i => i.nombre)|json_encode }}">
+            </canvas>
         </div>
     </div>
-
     <div class="chart-card">
         <div class="cc-head">
             <div class="cc-head-info">
@@ -275,15 +238,16 @@
             </div>
         </div>
         <div class="cc-body">
-            <canvas id="chartStatut"></canvas>
+            <canvas id="chartStatut"
+                    data-labels="{{ leadsParStatut|map(i => i.status)|json_encode }}"
+                    data-values="{{ leadsParStatut|map(i => i.nombre)|json_encode }}">
+            </canvas>
         </div>
     </div>
-
 </div>
 
 <!-- Charts Row 2 -->
 <div class="chart-row cr-5-7">
-
     <div class="chart-card">
         <div class="cc-head">
             <div class="cc-head-info">
@@ -292,10 +256,12 @@
             </div>
         </div>
         <div class="cc-body">
-            <canvas id="chartEntite"></canvas>
+            <canvas id="chartEntite"
+                    data-labels="{{ leadsParEntite|map(i => i.entite)|json_encode }}"
+                    data-values="{{ leadsParEntite|map(i => i.nombre)|json_encode }}">
+            </canvas>
         </div>
     </div>
-
     <div class="chart-card">
         <div class="cc-head">
             <div class="cc-head-info">
@@ -304,10 +270,12 @@
             </div>
         </div>
         <div class="cc-body">
-            <canvas id="chartSources"></canvas>
+            <canvas id="chartSources"
+                    data-labels="{{ topSources|map(i => i.source)|json_encode }}"
+                    data-values="{{ topSources|map(i => i.nombre)|json_encode }}">
+            </canvas>
         </div>
     </div>
-
 </div>
 
 {% endblock %}
@@ -315,11 +283,14 @@
 {% block javascripts %}
 <script>
 (function () {
+    'use strict';
+
+    /* ── Chart defaults ────────────────────────────────────────────── */
     Chart.defaults.font.family = "'Inter', sans-serif";
     Chart.defaults.font.size   = 11;
     Chart.defaults.color       = '#8b93b0';
 
-    const TIP = {
+    var TIP = {
         backgroundColor: '#fff',
         titleColor:      '#0c0e1a',
         bodyColor:       '#4a5168',
@@ -329,154 +300,147 @@
         cornerRadius:    10,
         displayColors:   false,
     };
-
-    const SCALE_Y = {
+    var SCALE_Y = {
         beginAtZero: true,
-        grid:  { color: 'rgba(0,0,0,0.04)', drawBorder: false },
-        ticks: { padding: 8, color: '#8b93b0' },
+        grid:   { color: 'rgba(0,0,0,0.04)', drawBorder: false },
+        ticks:  { padding: 8, color: '#8b93b0' },
+        border: { display: false },
+    };
+    var SCALE_X = {
+        grid:   { display: false, drawBorder: false },
+        ticks:  { padding: 8, color: '#8b93b0' },
         border: { display: false },
     };
 
-    const SCALE_X = {
-        grid:  { display: false, drawBorder: false },
-        ticks: { padding: 8, color: '#8b93b0' },
-        border: { display: false },
-    };
-
-    /* Evolution */
-    (function () {
-        const ctx  = document.getElementById('chartEvolution').getContext('2d');
-        const grad = ctx.createLinearGradient(0, 0, 0, 220);
+    /* ── Chart factory functions (one per chart type) ──────────────── */
+    function initEvolution(canvas) {
+        var ctx    = canvas.getContext('2d');
+        var grad   = ctx.createLinearGradient(0, 0, 0, 220);
         grad.addColorStop(0, 'rgba(79,142,247,0.2)');
         grad.addColorStop(1, 'rgba(79,142,247,0)');
-
-        new Chart(ctx, {
+        return new Chart(ctx, {
             type: 'line',
             data: {
-                labels: {{ evolutionMois|map(i => i.mois)|json_encode|raw }},
+                labels:   JSON.parse(canvas.dataset.labels),
                 datasets: [{
-                    label: 'Leads',
-                    data:  {{ evolutionMois|map(i => i.nombre)|json_encode|raw }},
-                    borderColor: '#4f8ef7',
-                    backgroundColor: grad,
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.42,
-                    pointRadius: 0,
-                    pointHoverRadius: 5,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#4f8ef7',
-                    pointBorderWidth: 2,
+                    label: 'Leads', data: JSON.parse(canvas.dataset.values),
+                    borderColor: '#4f8ef7', backgroundColor: grad,
+                    borderWidth: 2, fill: true, tension: 0.42,
+                    pointRadius: 0, pointHoverRadius: 5,
+                    pointBackgroundColor: '#fff', pointBorderColor: '#4f8ef7', pointBorderWidth: 2,
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false }, tooltip: TIP },
                 scales: { y: SCALE_Y, x: SCALE_X },
                 interaction: { intersect: false, mode: 'index' },
             }
         });
-    })();
+    }
 
-    /* Statut Doughnut */
-    (function () {
-        const COLORS = ['#4f8ef7','#6c47ff','#0ea5e9','#475569','#6ee7f7','#a78bfa','#93c5fd','#cbd5e1'];
-        new Chart(document.getElementById('chartStatut'), {
+    function initStatut(canvas) {
+        var COLORS = ['#4f8ef7','#6c47ff','#0ea5e9','#475569','#6ee7f7','#a78bfa','#93c5fd','#cbd5e1'];
+        return new Chart(canvas, {
             type: 'doughnut',
             data: {
-                labels: {{ leadsParStatut|map(i => i.status)|json_encode|raw }},
+                labels:   JSON.parse(canvas.dataset.labels),
                 datasets: [{
-                    data: {{ leadsParStatut|map(i => i.nombre)|json_encode|raw }},
+                    data: JSON.parse(canvas.dataset.values),
                     backgroundColor: COLORS,
-                    borderWidth: 3,
-                    borderColor: '#fff',
-                    hoverOffset: 10,
-                    hoverBorderWidth: 0,
+                    borderWidth: 3, borderColor: '#fff',
+                    hoverOffset: 10, hoverBorderWidth: 0,
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '72%',
+                responsive: true, maintainAspectRatio: false, cutout: '72%',
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: {
-                            boxWidth: 8, boxHeight: 8,
-                            usePointStyle: true, pointStyle: 'circle',
-                            padding: 12, color: '#4a5168',
-                            font: { size: 11 }
-                        }
+                        labels: { boxWidth: 8, boxHeight: 8, usePointStyle: true, pointStyle: 'circle', padding: 12, color: '#4a5168', font: { size: 11 } }
                     },
-                    tooltip: { ...TIP, displayColors: true, boxPadding: 4 },
+                    tooltip: Object.assign({}, TIP, { displayColors: true, boxPadding: 4 }),
                 }
             }
         });
-    })();
+    }
 
-    /* Entité vertical bar */
-    (function () {
-        const ctx  = document.getElementById('chartEntite').getContext('2d');
-        const grad = ctx.createLinearGradient(0, 0, 0, 220);
+    function initEntite(canvas) {
+        var ctx  = canvas.getContext('2d');
+        var grad = ctx.createLinearGradient(0, 0, 0, 220);
         grad.addColorStop(0, '#4f8ef7');
         grad.addColorStop(1, 'rgba(79,142,247,0.25)');
-
-        new Chart(ctx, {
+        return new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: {{ leadsParEntite|map(i => i.entite)|json_encode|raw }},
+                labels:   JSON.parse(canvas.dataset.labels),
                 datasets: [{
-                    label: 'Leads',
-                    data:  {{ leadsParEntite|map(i => i.nombre)|json_encode|raw }},
-                    backgroundColor: grad,
-                    borderRadius: 6,
-                    borderSkipped: false,
-                    barPercentage: 0.55,
+                    label: 'Leads', data: JSON.parse(canvas.dataset.values),
+                    backgroundColor: grad, borderRadius: 6, borderSkipped: false, barPercentage: 0.55,
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false }, tooltip: TIP },
                 scales: { y: SCALE_Y, x: SCALE_X },
             }
         });
-    })();
+    }
 
-    /* Sources horizontal bar */
-    (function () {
-        const ctx  = document.getElementById('chartSources').getContext('2d');
-        const grad = ctx.createLinearGradient(380, 0, 0, 0);
+    function initSources(canvas) {
+        var ctx  = canvas.getContext('2d');
+        var grad = ctx.createLinearGradient(380, 0, 0, 0);
         grad.addColorStop(0, '#6c47ff');
         grad.addColorStop(1, '#4f8ef7');
-
-        new Chart(ctx, {
+        return new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: {{ topSources|map(i => i.source)|json_encode|raw }},
+                labels:   JSON.parse(canvas.dataset.labels),
                 datasets: [{
-                    label: 'Leads',
-                    data:  {{ topSources|map(i => i.nombre)|json_encode|raw }},
-                    backgroundColor: grad,
-                    borderRadius: 6,
-                    borderSkipped: false,
-                    barPercentage: 0.55,
+                    label: 'Leads', data: JSON.parse(canvas.dataset.values),
+                    backgroundColor: grad, borderRadius: 6, borderSkipped: false, barPercentage: 0.55,
                 }]
             },
             options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false }, tooltip: TIP },
-                scales: {
-                    x: SCALE_Y,
-                    y: SCALE_X,
-                },
+                scales: { x: SCALE_Y, y: SCALE_X },
             }
         });
-    })();
+    }
 
+    /* ── Lazy init via IntersectionObserver ────────────────────────── */
+    var CHART_MAP = {
+        chartEvolution: initEvolution,
+        chartStatut:    initStatut,
+        chartEntite:    initEntite,
+        chartSources:   initSources,
+    };
+
+    if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
+                var canvas = entry.target;
+                var factory = CHART_MAP[canvas.id];
+                if (factory) {
+                    factory(canvas);
+                    observer.unobserve(canvas);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        Object.keys(CHART_MAP).forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) observer.observe(el);
+        });
+    } else {
+        /* Fallback for old browsers: init all immediately */
+        Object.keys(CHART_MAP).forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) CHART_MAP[id](el);
+        });
+    }
 })();
 </script>
 {% endblock %}

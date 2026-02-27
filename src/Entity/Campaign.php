@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\CampaignRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+#[ORM\HasLifecycleCallbacks] 
 
 #[ORM\Entity(repositoryClass: CampaignRepository::class)]
 class Campaign
